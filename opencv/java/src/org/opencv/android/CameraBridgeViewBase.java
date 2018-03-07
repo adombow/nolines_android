@@ -49,6 +49,7 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
     protected int mCameraIndex = CAMERA_ID_ANY;
     protected boolean mEnabled;
     protected FpsMeter mFpsMeter = null;
+    protected int userRotation = 0;
 
     public static final int CAMERA_ID_ANY   = -1;
     public static final int CAMERA_ID_BACK  = 99;
@@ -413,6 +414,9 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
                 if (BuildConfig.DEBUG)
                     Log.d(TAG, "mStretch value: " + mScale);
 
+                canvas.save();
+                canvas.rotate(userRotation,  (canvas.getWidth()/ 2),(canvas.getHeight()/ 2));
+
                 if (mScale != 0) {
                     canvas.drawBitmap(mCacheBitmap, new Rect(0,0,mCacheBitmap.getWidth(), mCacheBitmap.getHeight()),
                          new Rect((int)((canvas.getWidth() - mScale*mCacheBitmap.getWidth()) / 2),
@@ -491,5 +495,14 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
         }
 
         return new Size(calcWidth, calcHeight);
+    }
+
+    /**
+     * This setter method can be called by subclasses to fix the preview rotation
+     *
+     * @param userRotation
+     */
+    public void setUserRotation(int userRotation) {
+        this.userRotation = userRotation;
     }
 }

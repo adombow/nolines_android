@@ -1,20 +1,45 @@
 package com.nolines.nolines;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.res.AssetManager;
+import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.Display;
 import android.view.MotionEvent;
+import android.view.Surface;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.WindowManager;
+import android.widget.Toast;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
+import org.opencv.android.Utils;
+import org.opencv.core.DMatch;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfByte;
+import org.opencv.core.MatOfDMatch;
+import org.opencv.core.MatOfKeyPoint;
+import org.opencv.core.Scalar;
+import org.opencv.features2d.DescriptorExtractor;
+import org.opencv.features2d.DescriptorMatcher;
+import org.opencv.features2d.FeatureDetector;
+import org.opencv.features2d.Features2d;
+import org.opencv.imgproc.Imgproc;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -23,77 +48,16 @@ import org.opencv.core.Mat;
 public class ARActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
     private static final String TAG = "ARActivity";
 
-    /**
-     * Whether or not the system UI should be auto-hidden after
-     * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
-     */
-    private static final boolean AUTO_HIDE = true;
-
-    /**
-     * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
-     * user interaction before hiding the system UI.
-     */
-    private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
-
-    /**
-     * Some older devices needs a small delay between UI widget updates
-     * and a change of the status and navigation bar.
-     */
-    private static final int UI_ANIMATION_DELAY = 300;
-    private final Handler mHideHandler = new Handler();
-    private View mContentView;
-    private final Runnable mHidePart2Runnable = new Runnable() {
-        @SuppressLint("InlinedApi")
-        @Override
-        public void run() {
-            // Delayed removal of status and navigation bar
-
-            // Note that some of these constants are new as of API 16 (Jelly Bean)
-            // and API 19 (KitKat). It is safe to use them, as they are inlined
-            // at compile-time and do nothing on earlier devices.
-           /* mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
-                    | View.SYSTEM_UI_FLAG_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);*/
-        }
-    };
-    private View mControlsView;
-    private final Runnable mShowPart2Runnable = new Runnable() {
-        @Override
-        public void run() {
-            // Delayed display of UI elements
-            ActionBar actionBar = getSupportActionBar();
-            if (actionBar != null) {
-                actionBar.show();
-            }
-            //mControlsView.setVisibility(View.VISIBLE);
-        }
-    };
-    private boolean mVisible;
-    private final Runnable mHideRunnable = new Runnable() {
-        @Override
-        public void run() {
-            hide();
-        }
-    };
-    /**
-     * Touch listener to use for in-layout UI controls to delay hiding the
-     * system UI. This is to prevent the jarring behavior of controls going away
-     * while interacting with activity UI.
-     */
-    private final View.OnTouchListener mDelayHideTouchListener = new View.OnTouchListener() {
-        @Override
-        public boolean onTouch(View view, MotionEvent motionEvent) {
-            if (AUTO_HIDE) {
-                delayedHide(AUTO_HIDE_DELAY_MILLIS);
-            }
-            return false;
-        }
-    };
-
     private CameraBridgeViewBase mOpenCvCameraView;
+    Scalar RED = new Scalar(255, 0, 0);
+    Scalar GREEN = new Scalar(0, 255, 0);
+    FeatureDetector detector;
+    DescriptorExtractor descriptor;
+    DescriptorMatcher matcher;
+    Mat descriptors2,descriptors1;
+    Mat img1;
+    MatOfKeyPoint keypoints1,keypoints2;
+
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -102,7 +66,14 @@ public class ARActivity extends AppCompatActivity implements CameraBridgeViewBas
                 case LoaderCallbackInterface.SUCCESS:
                 {
                     Log.i(TAG, "OpenCV loaded successfully");
+                    updateCameraViewRotation(mOpenCvCameraView);
                     mOpenCvCameraView.enableView();
+
+                    try {
+                        initializeOpenCVDependencies();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 } break;
                 default:
                 {
@@ -112,37 +83,48 @@ public class ARActivity extends AppCompatActivity implements CameraBridgeViewBas
         }
     };
 
+    private void initializeOpenCVDependencies() throws IOException {
+        mOpenCvCameraView.enableView();
+
+        detector = FeatureDetector.create(FeatureDetector.ORB);
+        descriptor = DescriptorExtractor.create(DescriptorExtractor.ORB);
+        matcher = DescriptorMatcher.create(DescriptorMatcher.BRUTEFORCE_HAMMING);
+
+        /* Convert reference image to camera format  */
+        img1 = new Mat();
+        AssetManager assetManager = getAssets();
+        InputStream istr = assetManager.open("map.png");
+        Bitmap bitmap = BitmapFactory.decodeStream(istr);
+        Utils.bitmapToMat(bitmap, img1);
+        Imgproc.cvtColor(img1, img1, Imgproc.COLOR_RGB2GRAY);
+        img1.convertTo(img1, 0); //converting the image to match with the type of the cameras image
+
+        descriptors1 = new Mat();
+        keypoints1 = new MatOfKeyPoint();
+
+        /* Compute feature vector of reference image */
+        detector.detect(img1, keypoints1);
+        descriptor.compute(img1, keypoints1, descriptors1);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_ar);
-/*
-        mVisible = true;
-        //mControlsView = findViewById(R.id.fullscreen_content_controls);
-        //mContentView = findViewById(R.id.fullscreen_content);
-
-
-        // Set up the user interaction to manually show or hide the system UI.
-        mContentView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                toggle();
-            }
-        });
-
-        // Upon interacting with UI controls, delay any scheduled hide()
-        // operations to prevent the jarring behavior of controls going away
-        // while interacting with the UI.
-        findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
-
-        //setContentView(R.layout.tutorial1_surface_view);*/
 
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.tutorial1_activity_java_surface_view);
 
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
 
         mOpenCvCameraView.setCvCameraViewListener(this);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        updateCameraViewRotation(mOpenCvCameraView);
     }
 
     @Override
@@ -164,65 +146,13 @@ public class ARActivity extends AppCompatActivity implements CameraBridgeViewBas
             Log.d(TAG, "OpenCV library found inside package. Using it!");
             mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         }
+
     }
 
     public void onDestroy() {
         super.onDestroy();
         if (mOpenCvCameraView != null)
             mOpenCvCameraView.disableView();
-    }
-
-    @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-
-        // Trigger the initial hide() shortly after the activity has been
-        // created, to briefly hint to the user that UI controls
-        // are available.
-        delayedHide(100);
-    }
-
-    private void toggle() {
-        if (mVisible) {
-            hide();
-        } else {
-            show();
-        }
-    }
-
-    private void hide() {
-        // Hide UI first
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.hide();
-        }
-        //mControlsView.setVisibility(View.GONE);
-        //mVisible = false;
-
-        // Schedule a runnable to remove the status and navigation bar after a delay
-        //mHideHandler.removeCallbacks(mShowPart2Runnable);
-        //mHideHandler.postDelayed(mHidePart2Runnable, UI_ANIMATION_DELAY);
-    }
-
-    @SuppressLint("InlinedApi")
-    private void show() {
-        // Show the system bar
-        //mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                //| View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
-        //mVisible = true;
-
-        // Schedule a runnable to display UI elements after a delay
-        //mHideHandler.removeCallbacks(mHidePart2Runnable);
-        //mHideHandler.postDelayed(mShowPart2Runnable, UI_ANIMATION_DELAY);
-    }
-
-    /**
-     * Schedules a call to hide() in delay milliseconds, canceling any
-     * previously scheduled calls.
-     */
-    private void delayedHide(int delayMillis) {
-        mHideHandler.removeCallbacks(mHideRunnable);
-        mHideHandler.postDelayed(mHideRunnable, delayMillis);
     }
 
     public void onCameraViewStarted(int width, int height) {
@@ -232,6 +162,96 @@ public class ARActivity extends AppCompatActivity implements CameraBridgeViewBas
     }
 
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        return inputFrame.rgba();
+        return recognize(inputFrame.rgba());
+        //return inputFrame.rgba();
+    }
+
+    public Mat recognize(Mat aInputFrame){
+
+        Imgproc.cvtColor(aInputFrame, aInputFrame, Imgproc.COLOR_RGB2GRAY);
+        descriptors2 = new Mat();
+        keypoints2 = new MatOfKeyPoint();
+
+        /* Compute feature vector of new frame */
+        detector.detect(aInputFrame, keypoints2);
+        descriptor.compute(aInputFrame, keypoints2, descriptors2);
+
+        // Matching
+
+        MatOfDMatch matches = new MatOfDMatch();
+        if (img1.type() == aInputFrame.type()) {
+            try{
+                matcher.match(descriptors1, descriptors2, matches);
+            }catch(Exception e){
+                Log.v(TAG,"Descriptor 1: " + descriptors1.height() + " " + descriptors1.width());
+                Log.v(TAG,"Descriptor 1: " + descriptors2.height() + " " + descriptors2.width());
+            }
+
+        } else {
+            return aInputFrame;
+        }
+
+        List<DMatch> matchesList = matches.toList();
+
+        Double max_dist = 0.0;
+        Double min_dist = 100.0;
+
+        for (int i = 0; i < matchesList.size(); i++) {
+            Double dist = (double) matchesList.get(i).distance;
+            if (dist < min_dist)
+                min_dist = dist;
+            if (dist > max_dist)
+                max_dist = dist;
+        }
+
+        LinkedList<DMatch> good_matches = new LinkedList<DMatch>();
+        for (int i = 0; i < matchesList.size(); i++) {
+            if (matchesList.get(i).distance <= (1.5 * min_dist))
+                good_matches.addLast(matchesList.get(i));
+        }
+
+        MatOfDMatch goodMatches = new MatOfDMatch();
+        goodMatches.fromList(good_matches);
+
+        Mat outputImg = new Mat();
+        MatOfByte drawnMatches = new MatOfByte();
+        if (aInputFrame.empty() || aInputFrame.cols() < 1 || aInputFrame.rows() < 1) {
+            return aInputFrame;
+        }
+
+
+        //Features2d.drawKeypoints(aInputFrame, keypoints2, outputImg, GREEN,0);
+        Features2d.drawMatches(img1, keypoints1, aInputFrame, keypoints2, goodMatches, outputImg, GREEN, RED, drawnMatches, Features2d.NOT_DRAW_SINGLE_POINTS);
+        Imgproc.resize(outputImg, outputImg, aInputFrame.size());
+
+        return outputImg;
+
+    }
+
+
+    private void updateCameraViewRotation(CameraBridgeViewBase mOpenCvCameraView){
+        final Display display = ((WindowManager) getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+
+        switch (display.getRotation()) {
+            case Surface.ROTATION_0:
+                System.out.println("SCREEN_ORIENTATION_PORTRAIT");
+                mOpenCvCameraView.setUserRotation(90);
+                break;
+
+            case Surface.ROTATION_90:
+                System.out.println("SCREEN_ORIENTATION_LANDSCAPE");
+                mOpenCvCameraView.setUserRotation(0);
+                break;
+
+            case Surface.ROTATION_180:
+                System.out.println("SCREEN_ORIENTATION_REVERSE_PORTRAIT");
+                break;
+
+            case Surface.ROTATION_270:
+                System.out.println("SCREEN_ORIENTATION_REVERSE_LANDSCAPE");
+                // This one is broken
+                mOpenCvCameraView.setUserRotation(-90);
+                break;
+        }
     }
 }
