@@ -27,7 +27,9 @@
             android:name=".ARActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_ar"
-            android:theme="@style/FullscreenTheme" />
+            android:screenOrientation="landscape"
+            android:theme="@style/FullscreenTheme" >
+        </activity>
 
         <meta-data
             android:name="com.google.android.gms.version"
@@ -70,5 +72,4 @@
                 android:value="com.nolines.nolines.MainActivity" />
         </activity>
     </application>
-
 </manifest>
