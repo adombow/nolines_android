@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
         android:allowBackup="true"
@@ -26,6 +27,48 @@
             android:name=".ARActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_ar"
-            android:theme="@style/FullscreenTheme"></activity>
+            android:theme="@style/FullscreenTheme" />
+
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyAr2G3Jc26ZM7EPFB3rr5KMs44OmcThBHk" />
+
+        <activity
+            android:name=".TicketSelectActivity"
+            android:label="@string/title_activity_ticket_select"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.nolines.nolines.MainActivity" />
+        </activity>
+        <activity
+            android:name=".PickTicketTimeActivity"
+            android:label="PickTicketTimeActivity"
+            android:parentActivityName=".TicketSelectActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.nolines.nolines.TicketSelectActivity" />
+        </activity>
+        <activity
+            android:name=".MapsActivity"
+            android:label="@string/title_activity_maps">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.nolines.nolines.MainActivity" />
+        </activity>
+        <activity
+            android:name=".MapsDrawerActivity"
+            android:label="@string/title_activity_maps_drawer"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.nolines.nolines.MainActivity" />
+        </activity>
     </application>
+
 </manifest>
