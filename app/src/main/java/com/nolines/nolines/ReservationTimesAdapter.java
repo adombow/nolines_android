@@ -1,6 +1,5 @@
 package com.nolines.nolines;
 
-import android.app.Activity;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.CardView;
@@ -17,11 +16,11 @@ import java.util.List;
  * {@link RecyclerView.Adapter} that can display a {@link String} and makes a call to the
  * specified {@link OnListFragmentInteractionListener}.
  */
-public class RideWindowRecyclerViewAdapter extends RecyclerView.Adapter<RideWindowRecyclerViewAdapter.RideWindowViewHolder> {
+public class ReservationTimesAdapter extends RecyclerView.Adapter<ReservationTimesAdapter.RideWindowViewHolder> {
 
     private final List<String> rideWindows;
 
-    public RideWindowRecyclerViewAdapter(List<String> items) {
+    public ReservationTimesAdapter(List<String> items) {
         rideWindows = items;
     }
 
