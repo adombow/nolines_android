@@ -15,7 +15,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.nolines.nolines.Web.Ride;
+import com.nolines.nolines.api.models.Ride;
 import com.nolines.nolines.dummy.DummyContent;
 
 import java.util.ArrayList;

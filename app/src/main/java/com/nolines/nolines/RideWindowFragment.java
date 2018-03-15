@@ -10,9 +10,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.nolines.nolines.dummy.DummyContent;
-import com.nolines.nolines.dummy.DummyContent.DummyItem;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -72,7 +69,7 @@ public class RideWindowFragment extends Fragment {
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            recyclerView.setAdapter(new RideWindowRecyclerViewAdapter(rideWindows));
+            recyclerView.setAdapter(new ReservationTimesAdapter(rideWindows));
         }
         return view;
     }
