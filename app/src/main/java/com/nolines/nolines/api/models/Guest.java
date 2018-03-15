@@ -1,9 +1,9 @@
-package com.nolines.nolines.Web;
+package com.nolines.nolines.api.models;
 
 import java.util.ArrayList;
 
 /**
- * Created by Andrew on 2018-03-13.
+ * Created by timot on 3/14/2018.
  */
 
 public class Guest {
@@ -13,11 +13,11 @@ public class Guest {
 
     public Guest(String name) {
         this.name = name;
-        this.tickets = new ArrayList<Ticket>();
+        this.tickets = new ArrayList<>();
     }
 
     public String getName(){ return this.name; }
     public Ticket getTicket(int index){
-        return this.tickets.get(index);
+        return tickets.get(index);
     }
 }

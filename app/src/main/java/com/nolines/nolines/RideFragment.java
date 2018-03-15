@@ -1,19 +1,28 @@
 package com.nolines.nolines;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.app.Fragment;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
-import com.nolines.nolines.Web.Ride;
+import com.nolines.nolines.api.models.Ride;
+import com.nolines.nolines.api.service.NoLinesClient;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * A fragment representing a list of Items.
@@ -22,13 +31,13 @@ import java.util.List;
  * interface.
  */
 public class RideFragment extends Fragment {
-
-    private List<Ride> rides;
+    private static final String TAG = "RideFragment";
 
     private static final String ARG_COLUMN_COUNT = "column-count";
     private int mColumnCount = 2;
     private OnListFragmentInteractionListener mListener;
 
+    @BindView(R.id.ridelist) RecyclerView recyclerView;
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
@@ -50,11 +59,12 @@ public class RideFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        Log.v(TAG,TAG);
         if (getArguments() != null) {
             mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
         }
 
-        populateRideList();
+        getRides();
     }
 
     @Override
@@ -62,17 +72,10 @@ public class RideFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_ride_list, container, false);
 
-        // Set the adapter
-        if (view instanceof RecyclerView) {
-            Context context = view.getContext();
-            RecyclerView recyclerView = (RecyclerView) view;
-            if (mColumnCount <= 1) {
-                recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            } else {
-                recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
-            }
-            recyclerView.setAdapter(new RideAdapter(rides, mListener));
-        }
+        view.setBackgroundColor(Color.BLACK);
+
+        ButterKnife.bind(this,view);
+
         return view;
     }
 
@@ -109,10 +112,29 @@ public class RideFragment extends Fragment {
         void onListFragmentInteraction(Ride ride);
     }
 
-    private void populateRideList(){
-        rides = new ArrayList<>();
-        rides.add(new Ride("Coaster", 49.242128, -123.174116, 15, android.R.drawable.ic_media_play));
-        rides.add(new Ride("Ferris Wheel", 49.241532, -123.177870, 10, android.R.drawable.ic_media_next));
-        rides.add(new Ride("Log Flume", 49.243514, -123.175682, 30, android.R.drawable.ic_media_pause));
+    private void getRides(){
+
+        /* Modify Later to put baseUrl globally*/
+        Retrofit.Builder builder = new Retrofit.Builder()
+                .baseUrl("http://nolines-production.herokuapp.com/")
+                .addConverterFactory(GsonConverterFactory.create());
+
+        Retrofit retrofit = builder.build();
+
+        NoLinesClient client = retrofit.create(NoLinesClient.class);
+        Call<List<Ride>> call = client.getRides();
+
+        call.enqueue(new Callback<List<Ride>>() {
+            @Override
+            public void onResponse(Call<List<Ride>> call, Response<List<Ride>> response) {
+                List<Ride> rides = response.body();
+                recyclerView.setAdapter(new RideAdapter(rides));
+            }
+
+            @Override
+            public void onFailure(Call<List<Ride>> call, Throwable t) {
+                Toast.makeText(getActivity(),"Network Error",Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

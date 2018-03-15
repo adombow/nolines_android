@@ -38,6 +38,8 @@ import org.opencv.imgproc.Imgproc;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -93,7 +95,7 @@ public class ARActivity extends AppCompatActivity implements CameraBridgeViewBas
         /* Convert reference image to camera format  */
         img1 = new Mat();
         AssetManager assetManager = getAssets();
-        InputStream istr = assetManager.open("poster.jpg");
+        InputStream istr = assetManager.open("demo.png");
         Bitmap bitmap = BitmapFactory.decodeStream(istr);
         Utils.bitmapToMat(bitmap, img1);
         Imgproc.cvtColor(img1, img1, Imgproc.COLOR_RGB2GRAY);
@@ -123,7 +125,7 @@ public class ARActivity extends AppCompatActivity implements CameraBridgeViewBas
 
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.tutorial1_activity_java_surface_view);
 
-        mOpenCvCameraView.setMaxFrameSize(1000, 1000);
+        mOpenCvCameraView.setMaxFrameSize(1280, 720);
 
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
 
@@ -190,9 +192,180 @@ public class ARActivity extends AppCompatActivity implements CameraBridgeViewBas
 
         /* Matching */
 
+        List<MatOfDMatch> matches12 = new ArrayList<>();
+        List<MatOfDMatch> matches21 = new ArrayList<>();
+
+        if (img1.type() == aInputFrame.type() && descriptors1.cols() == descriptors2.cols()) {
+            matcher.knnMatch(descriptors1, descriptors2, matches12,2);
+            matcher.knnMatch(descriptors2, descriptors1, matches21,2);
+        }
+        else {
+            return aInputFrame;
+        }
+
+
+        Log.i(TAG,"Match Sizes For Ratio Test: " + matches12.size()+" " + matches21.size());
+
+        Double max_dist = 0.0;
+        Double min_dist = 100.0;
+
+        LinkedList<DMatch> good_matches1 = new LinkedList<>();
+        for (Iterator<MatOfDMatch> iterator = matches12.iterator(); iterator.hasNext();) {
+            MatOfDMatch matOfDMatch = (MatOfDMatch) iterator.next();
+            if (matOfDMatch.toArray().length >= 2 && matOfDMatch.toArray()[0].distance / matOfDMatch.toArray()[1].distance < 0.9) {
+                good_matches1.add(matOfDMatch.toArray()[0]);
+
+                Double dist = (double) matOfDMatch.toArray()[0].distance;
+
+                if (dist < min_dist)
+                    min_dist = dist;
+                if (dist > max_dist)
+                    max_dist = dist;
+            }
+        }
+
+
+
+        for (int i = 0; i < good_matches1.size(); i++) {
+            if (good_matches1.get(i).distance > (3 * min_dist))
+                break;
+                //good_matches1.remove(i);
+        }
+
+
+        max_dist = 0.0;
+        min_dist = 100.0;
+
+        LinkedList<DMatch> good_matches2 = new LinkedList<>();
+        for (Iterator<MatOfDMatch> iterator = matches21.iterator(); iterator.hasNext();) {
+            MatOfDMatch matOfDMatch = (MatOfDMatch) iterator.next();
+            if (matOfDMatch.toArray().length >= 2 && matOfDMatch.toArray()[0].distance / matOfDMatch.toArray()[1].distance < 0.8) {
+                good_matches2.add(matOfDMatch.toArray()[0]);
+
+                Double dist = (double) matOfDMatch.toArray()[0].distance;
+
+                if (dist < min_dist)
+                    min_dist = dist;
+                if (dist > max_dist)
+                    max_dist = dist;
+            }
+        }
+
+        for (int i = 0; i < good_matches2.size(); i++) {
+            if (good_matches2.get(i).distance > (3 * min_dist))
+                break;
+               //good_matches2.remove(i);
+        }
+
+
+        Log.i(TAG,"Match Sizes For Symmetry Test: " + good_matches1.size()+" " + good_matches2.size());
+
+        //Log.i(TAG, "good_match1: "+good_matches1.toString());
+
+        List<DMatch> best_matches = new ArrayList<>();
+        for (Iterator<DMatch> iterator = good_matches1.iterator(); iterator.hasNext();) {
+            DMatch dMatch12 = (DMatch) iterator.next();
+
+            for (Iterator<DMatch> iterator1 = good_matches2.iterator(); iterator1.hasNext();){
+                DMatch dMatch21 = (DMatch) iterator1.next();
+                //Log.i(TAG,"dmatch12: " + dMatch12.queryIdx + " " + dMatch12.imgIdx);
+                //Log.i(TAG,"dmatch21: " + dMatch21.queryIdx + " " + dMatch21.imgIdx);
+                if(dMatch12.trainIdx == dMatch21.queryIdx && dMatch12.queryIdx == dMatch21.trainIdx){
+                    best_matches.add(dMatch12);
+                    //Log.i(TAG,"Symmetrical Match Found");
+                    break;
+                }
+            }
+        }
+
+        LinkedList<DMatch> rawMatches = new LinkedList<>();
+        for (Iterator<MatOfDMatch> iterator = matches12.iterator(); iterator.hasNext();) {
+            MatOfDMatch matOfDMatch = (MatOfDMatch) iterator.next();
+            rawMatches.add(matOfDMatch.toArray()[0]);
+        }
+
+        MatOfDMatch filteredMatchesForDisplay = new MatOfDMatch();
+        filteredMatchesForDisplay.fromList(best_matches);
+        Log.i(TAG,"Filtered matches: " + best_matches.size());
+
+        Mat outputImg = new Mat();
+        MatOfByte drawnMatches = new MatOfByte();
+        if (aInputFrame.empty() || aInputFrame.cols() < 1 || aInputFrame.rows() < 1) {
+            return aInputFrame;
+        }
+
+        //Features2d.drawKeypoints(aInputFrame, inputKeypoints, outputImg, GREEN,0);
+        Features2d.drawMatches(
+                img1,
+                srcKeypoints,
+                aInputFrame,
+                inputKeypoints,
+                filteredMatchesForDisplay,
+                outputImg,
+                GREEN,
+                RED,
+                drawnMatches,
+                0);
+
+        if(best_matches.size() > 500    ){
+            LinkedList<Point> srcPointList = new LinkedList<Point>();
+            LinkedList<Point> inputPointList = new LinkedList<Point>();
+
+            List<KeyPoint> srcKeypointsList = srcKeypoints.toList();
+            List<KeyPoint> inputKeypointsList = inputKeypoints.toList();
+
+            for (int i = 0; i < best_matches.size(); i++) {
+                srcPointList.addLast(srcKeypointsList.get(best_matches.get(i).queryIdx).pt);
+                inputPointList.addLast(inputKeypointsList.get(best_matches.get(i).trainIdx).pt);
+            }
+
+            MatOfPoint2f srcM = new MatOfPoint2f();
+            srcM.fromList(srcPointList);
+
+            MatOfPoint2f inputM = new MatOfPoint2f();
+            inputM.fromList(inputPointList);
+
+            Mat hg = Calib3d.findHomography(srcM, inputM);
+
+            Mat srcCorners = new Mat(4, 1, CvType.CV_32FC2);
+            Mat inputCorners = new Mat(4, 1, CvType.CV_32FC2);
+
+            srcCorners.put(0, 0, new double[]{0, 0});
+            srcCorners.put(1, 0, new double[]{img1.cols(), 0});
+            srcCorners.put(2, 0, new double[]{img1.cols(), img1.rows()});
+            srcCorners.put(3, 0, new double[]{0, img1.rows()});
+
+            Core.perspectiveTransform(srcCorners, inputCorners, hg);
+
+            Imgproc.line(outputImg, new Point(inputCorners.get(0, 0)), new Point(inputCorners.get(1, 0)), RED, 4);
+            Imgproc.line(outputImg, new Point(inputCorners.get(1, 0)), new Point(inputCorners.get(2, 0)), RED, 4);
+            Imgproc.line(outputImg, new Point(inputCorners.get(2, 0)), new Point(inputCorners.get(3, 0)), RED, 4);
+            Imgproc.line(outputImg, new Point(inputCorners.get(3, 0)), new Point(inputCorners.get(0, 0)), RED, 4);
+
+        }
+
+        Imgproc.resize(outputImg, outputImg, aInputFrame.size());
+
+        return outputImg;
+
+    }
+
+
+    public Mat recognize2(Mat aInputFrame) {
+
+        Imgproc.cvtColor(aInputFrame, aInputFrame, Imgproc.COLOR_RGB2GRAY);
+        descriptors2 = new Mat();
+        inputKeypoints = new MatOfKeyPoint();
+
+        /* Compute feature vector of new frame */
+        detector.detect(aInputFrame, inputKeypoints);
+        descriptor.compute(aInputFrame, inputKeypoints, descriptors2);
+
+        /* Matching */
+
         MatOfDMatch matches = new MatOfDMatch();
         if (img1.type() == aInputFrame.type() && descriptors1.cols() == descriptors2.cols()) {
-                matcher.match(descriptors1, descriptors2, matches);
+            matcher.match(descriptors1, descriptors2, matches);
         } else {
             return aInputFrame;
         }
@@ -227,8 +400,8 @@ public class ARActivity extends AppCompatActivity implements CameraBridgeViewBas
         }
 
 
-        Features2d.drawKeypoints(aInputFrame, inputKeypoints, outputImg, GREEN,0);
-        /*Features2d.drawMatches(
+        Features2d.drawKeypoints(aInputFrame, inputKeypoints, outputImg, GREEN, 0);
+        Features2d.drawMatches(
                 img1,
                 srcKeypoints,
                 aInputFrame,
@@ -238,9 +411,9 @@ public class ARActivity extends AppCompatActivity implements CameraBridgeViewBas
                 GREEN,
                 RED,
                 drawnMatches,
-                0);*/
+                0);
 
-        if(good_matches.size() > 5) {
+        if (good_matches.size() > 5) {
 
             LinkedList<Point> srcPointList = new LinkedList<Point>();
             LinkedList<Point> inputPointList = new LinkedList<Point>();
@@ -280,7 +453,6 @@ public class ARActivity extends AppCompatActivity implements CameraBridgeViewBas
         Imgproc.resize(outputImg, outputImg, aInputFrame.size());
 
         return outputImg;
-
     }
 
 

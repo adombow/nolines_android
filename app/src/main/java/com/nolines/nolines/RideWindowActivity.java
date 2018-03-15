@@ -8,7 +8,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.widget.TextView;
 
-import com.nolines.nolines.Web.Ride;
+import com.nolines.nolines.api.models.Ride;
 
 import java.util.ArrayList;
 import java.util.List;
