@@ -11,7 +11,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.nolines.nolines.RideFragment.OnListFragmentInteractionListener;
-import com.nolines.nolines.Web.Ride;
+import com.nolines.nolines.api.models.Ride;
+
 
 import java.util.List;
 
@@ -40,7 +41,7 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder
     public void onBindViewHolder(final RideViewHolder holder, final int position) {
         holder.rideImage.setImageResource(mRides.get(position).getPhotoID());
         holder.rideName.setText(mRides.get(position).getName());
-        String waitTimeString = "Wait time: " + Integer.toString(mRides.get(position).getWait_time());
+        String waitTimeString = "Wait time: " + Integer.toString(mRides.get(position).getWaitTime());
         holder.rideWaitTime.setText(waitTimeString);
 
         holder.cv.setOnClickListener(new View.OnClickListener() {
