@@ -1,11 +1,7 @@
 package com.nolines.nolines;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -15,22 +11,18 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.nolines.nolines.Web.Ride;
-import com.nolines.nolines.dummy.DummyContent;
+import com.nolines.nolines.Web.Ticket;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class TicketSelectActivity extends AppCompatActivity
+public class ViewTicketsActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
-        RideFragment.OnListFragmentInteractionListener {
+        TicketFragment.OnListFragmentInteractionListener{
 
     DrawerLayout drawer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_ticket_select);
+        setContentView(R.layout.activity_view_tickets);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -56,7 +48,7 @@ public class TicketSelectActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.ticket_select, menu);
+        getMenuInflater().inflate(R.menu.view_tickets, menu);
         return true;
     }
 
@@ -88,11 +80,11 @@ public class TicketSelectActivity extends AppCompatActivity
             //Intent intent = new Intent(this, MapsDrawerActivity.class);
             Intent intent = new Intent(this, MapsActivity.class);
             startActivity(intent);
-        } else if (id == R.id.nav_Rides){
-            drawer.closeDrawer(GravityCompat.START);
-        } else if (id == R.id.nav_Tickets){
-            Intent intent = new Intent(this, ViewTicketsActivity.class);
+        } else if (id == R.id.nav_Rides) {
+            Intent intent = new Intent(this, TicketSelectActivity.class);
             startActivity(intent);
+        } else if (id == R.id.nav_Tickets){
+            drawer.closeDrawer(GravityCompat.START);
         } else if (id == R.id.nav_About) {
 
         } else if (id == R.id.nav_share) {
@@ -108,7 +100,7 @@ public class TicketSelectActivity extends AppCompatActivity
     }
 
     @Override
-    public void onListFragmentInteraction(Ride ride){
+    public void onListFragmentInteraction(Ticket ticket){
 
     }
 }

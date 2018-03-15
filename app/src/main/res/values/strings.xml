@@ -15,10 +15,14 @@
     <string name="drawer_ticket_select">View Rides</string>
     <string name="drawer_AR">ARActivity</string>
     <string name="drawer_about">About</string>
+    <string name="view_tickets">View Tickets</string>
+
+    <string name="wait_time">Wait Time: </string>
 
     <string name="title_activity_ticket_select">TicketSelectActivity</string>
     <string name="title_activity_pick_ticket_time">PickTicketTimeActivity</string>
     <string name="title_activity_maps">Map</string>
     <string name="title_activity_maps_drawer">MapsDrawerActivity</string>
+    <string name="title_activity_view_tickets">ViewTicketsActivity</string>
 
 </resources>

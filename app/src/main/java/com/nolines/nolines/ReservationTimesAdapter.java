@@ -17,12 +17,14 @@ import java.util.List;
  * {@link RecyclerView.Adapter} that can display a {@link String} and makes a call to the
  * specified {@link OnListFragmentInteractionListener}.
  */
-public class RideWindowRecyclerViewAdapter extends RecyclerView.Adapter<RideWindowRecyclerViewAdapter.RideWindowViewHolder> {
+public class ReservationTimesAdapter extends RecyclerView.Adapter<ReservationTimesAdapter.RideWindowViewHolder> {
 
-    private final List<String> rideWindows;
+    private final List<String> mRideWindows;
+    private final RideWindowFragment.OnListFragmentInteractionListener mListener;
 
-    public RideWindowRecyclerViewAdapter(List<String> items) {
-        rideWindows = items;
+    public ReservationTimesAdapter(List<String> items, OnListFragmentInteractionListener listener) {
+        mRideWindows = items;
+        mListener = listener;
     }
 
     @Override
@@ -34,16 +36,17 @@ public class RideWindowRecyclerViewAdapter extends RecyclerView.Adapter<RideWind
 
     @Override
     public void onBindViewHolder(final RideWindowViewHolder holder, final int position) {
-        holder.rideWindow.setText(rideWindows.get(position));
+        holder.rideWindow.setText(mRideWindows.get(position));
 
         holder.cv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String selectedWindow = rideWindows.get(position);
+                String selectedWindow = mRideWindows.get(position);
                 //Send the current selection to the server
                 Snackbar.make(v, selectedWindow, Snackbar.LENGTH_SHORT).show();
                 //end the current fragment
                 //((Activity)v.getContext()).finish();
+                mListener.onListFragmentInteraction(mRideWindows.get(position));
             }
         });
     }
@@ -55,11 +58,11 @@ public class RideWindowRecyclerViewAdapter extends RecyclerView.Adapter<RideWind
 
     @Override
     public int getItemCount() {
-        return rideWindows.size();
+        return mRideWindows.size();
     }
 
     public class RideWindowViewHolder extends RecyclerView.ViewHolder {
-        CardView cv;
+        public final CardView cv;
         public final TextView rideWindow;
 
         public RideWindowViewHolder(View view) {

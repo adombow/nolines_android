@@ -10,6 +10,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.nolines.nolines.Web.Ride;
+import com.nolines.nolines.Web.Ticket;
+import com.nolines.nolines.dummy.DummyContent;
+import com.nolines.nolines.dummy.DummyContent.DummyItem;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,9 +24,9 @@ import java.util.List;
  * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
  * interface.
  */
-public class RideWindowFragment extends Fragment {
+public class TicketFragment extends Fragment {
 
-    private List<String> rideWindows;
+    private List<Ticket> tickets;
 
     private static final String ARG_COLUMN_COUNT = "column-count";
     private int mColumnCount = 1;
@@ -31,13 +36,13 @@ public class RideWindowFragment extends Fragment {
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public RideWindowFragment() {
+    public TicketFragment() {
     }
 
     // TODO: Customize parameter initialization
     @SuppressWarnings("unused")
-    public static RideWindowFragment newInstance(int columnCount) {
-        RideWindowFragment fragment = new RideWindowFragment();
+    public static TicketFragment newInstance(int columnCount) {
+        TicketFragment fragment = new TicketFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_COLUMN_COUNT, columnCount);
         fragment.setArguments(args);
@@ -52,13 +57,13 @@ public class RideWindowFragment extends Fragment {
             mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
         }
 
-        populateWindowList();
+        populateTicketList();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_ridewindow_list, container, false);
+        View view = inflater.inflate(R.layout.fragment_ticket_list, container, false);
 
         // Set the adapter
         if (view instanceof RecyclerView) {
@@ -69,10 +74,11 @@ public class RideWindowFragment extends Fragment {
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            recyclerView.setAdapter(new ReservationTimesAdapter(rideWindows, mListener));
+            recyclerView.setAdapter(new TicketRecyclerViewAdapter(tickets, mListener));
         }
         return view;
     }
+
 
     @Override
     public void onAttach(Context context) {
@@ -102,16 +108,15 @@ public class RideWindowFragment extends Fragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnListFragmentInteractionListener {
-        void onListFragmentInteraction(String window);
+        void onListFragmentInteraction(Ticket ticket);
     }
 
-    private void populateWindowList(){
-        rideWindows = new ArrayList<>();
-        rideWindows.add("9:00-9:30");
-        rideWindows.add("10:00-10:30");
-        rideWindows.add("10:30-11:00");
-        rideWindows.add("12:00-12:30");
-        rideWindows.add("14:00-14:30");
-        rideWindows.add("14:30-15:00");
+    private void populateTicketList(){
+        tickets = new ArrayList<>();
+        tickets.add(new Ticket("9:00", "9:30", "Coaster", 49.242128, -123.174116, 4, ""));
+        tickets.add(new Ticket("11:00", "11:30", "Ferris Wheel", 49.242128, -123.174116, 4, ""));
+        tickets.add(new Ticket("14:00", "14:30", "Log Flume", 49.242128, -123.174116, 4, ""));
+        tickets.add(new Ticket("10:00", "10:30", "Merry-Go-Round", 49.242128, -123.174116, 4, ""));
+
     }
 }

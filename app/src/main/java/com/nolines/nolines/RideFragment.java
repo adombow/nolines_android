@@ -11,8 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.nolines.nolines.Web.Ride;
-import com.nolines.nolines.dummy.DummyContent;
-import com.nolines.nolines.dummy.DummyContent.DummyItem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,7 +71,7 @@ public class RideFragment extends Fragment {
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            recyclerView.setAdapter(new MyRideRecyclerViewAdapter(rides));
+            recyclerView.setAdapter(new RideAdapter(rides, mListener));
         }
         return view;
     }
