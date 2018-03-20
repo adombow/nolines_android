@@ -12,9 +12,10 @@
     <string name="title_activity_map_">Map_Activity</string>
 
     <string name="drawer_map">Map View</string>
-    <string name="drawer_ticket_select">View Rides</string>
+    <string name="drawer_ride_view">View Rides</string>
     <string name="drawer_AR">ARActivity</string>
     <string name="drawer_about">About</string>
+    <string name="drawer_tickets">View Tickets</string>
 
     <string name="title_activity_ticket_select">TicketSelectActivity</string>
     <string name="title_activity_pick_ticket_time">PickTicketTimeActivity</string>
