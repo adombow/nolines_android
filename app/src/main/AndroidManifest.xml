@@ -61,7 +61,7 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.nolines.nolines.MainActivity" />
-        </activity>
+        </activity>]
         <activity
             android:name=".MapsDrawerActivity"
             android:label="@string/title_activity_maps_drawer"

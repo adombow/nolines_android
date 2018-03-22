@@ -1,12 +1,10 @@
 package com.nolines.nolines;
-
-import android.content.Context;
-import android.content.Intent;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -16,6 +14,9 @@ import com.squareup.picasso.Picasso;
 
 
 import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 /**
  * {@link RecyclerView.Adapter} that can display a {@link Ride} and makes a call to the
@@ -42,20 +43,11 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder
     public void onBindViewHolder(final RideViewHolder holder, final int position) {
         //Picasso.get().load(mRides.get(position).getPhotoURL()).into(holder.rideImage);
         holder.rideName.setText(mRides.get(position).getName());
-        String waitTimeString = "Wait time: " + Integer.toString(mRides.get(position).getWaitTime());
-        holder.rideWaitTime.setText(waitTimeString);
+        holder.rideWaitTime.setText(Integer.toString(mRides.get(position).getWaitTime()));
 
-//        holder.cv.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Ride currentRide = mRides.get(position);
-//                Context context = view.getContext();
-//                Intent intent = new Intent(context, RideWindowActivity.class);
-//                intent.putExtra("RideName", currentRide.getName());
-//                context.startActivity(intent);
-//                mListener.onListFragmentInteraction(mRides.get(position));
-//            }
-//        });
+        holder.button1.setText("1");
+        holder.button2.setText("2");
+        holder.button3.setText("3");
     }
 
     @Override
@@ -69,17 +61,25 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder
     }
 
     public class RideViewHolder extends RecyclerView.ViewHolder {
-        public final CardView cv;
-        public final TextView rideName;
-        public final TextView rideWaitTime;
-        public final ImageView rideImage;
+        @BindView(R.id.cardview) CardView cardView;
+        @BindView(R.id.ride_name) TextView rideName;
+        @BindView(R.id.ride_wait) TextView rideWaitTime;
+        @BindView(R.id.ride_photo) ImageView rideImage;
+
+        @BindView(R.id.button1) Button button1;
+        @BindView(R.id.button2) Button button2;
+        @BindView(R.id.button3) Button button3;
+
+        int minHeight;
 
         public RideViewHolder(View view) {
             super(view);
-            cv = view.findViewById(R.id.cv);
-            rideName = view.findViewById(R.id.ride_name);
-            rideWaitTime = view.findViewById(R.id.ride_wait);
-            rideImage = view.findViewById(R.id.ride_photo);
+            ButterKnife.bind(this,view);
+
+
+
         }
+
+
     }
 }
