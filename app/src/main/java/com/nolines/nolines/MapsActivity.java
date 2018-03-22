@@ -1,22 +1,22 @@
 package com.nolines.nolines;
 
 import android.Manifest;
-import android.app.Application;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Build;
 import android.os.Looper;
-import android.support.design.widget.Snackbar;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import android.widget.Toast;
 
 import com.akexorcist.googledirection.DirectionCallback;
 import com.akexorcist.googledirection.GoogleDirection;
+import com.akexorcist.googledirection.constant.TransportMode;
 import com.akexorcist.googledirection.model.Direction;
 import com.akexorcist.googledirection.model.Route;
 import com.akexorcist.googledirection.util.DirectionConverter;
@@ -34,12 +34,16 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.nolines.nolines.api.models.RidesHolder;
 import com.nolines.nolines.api.models.Ticket;
 import com.nolines.nolines.api.service.Updateable;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import butterknife.BindView;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback,
         Updateable,
@@ -48,7 +52,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         GoogleMap.OnMyLocationClickListener,
         GoogleMap.OnMapClickListener,
         GoogleMap.OnMarkerClickListener,
-        DirectionCallback{
+        DirectionCallback,
+        View.OnClickListener{
+
+    @BindView(R.id.dirFab) FloatingActionButton FindDirectionsBtn;
 
     /**
      * Request code for location permission request.
@@ -75,12 +82,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     List<Ticket> tickets;
     RidesHolder rides;
 
-    Marker startMarker;
+    Marker endMarker;
+    Polyline currentDirections;
+    boolean firstLocationFetch = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+
+        //FindDirectionsBtn.hide();
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -124,12 +135,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
+        mMap.setOnMarkerClickListener(this);
+        mMap.setOnMapClickListener(this);
         mMap.setOnMyLocationButtonClickListener(this);
         mMap.setOnMyLocationClickListener(this);
         enableMyLocation();
-
-        //move map camera
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(49.241978, -123.174134), 11));
 
         //Start fetching the rides to display
         rides.refreshRides();
@@ -142,20 +152,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             for (Location location : locationResult.getLocations()) {
                 //Log.i("MapsActivity", "Location: " + location.getLatitude() + " " + location.getLongitude());
                 mLastLocation = location;
-                if (mCurrLocationMarker != null) {
-                    mCurrLocationMarker.remove();
-                }
+            }
 
-                //Place current location marker
-                LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-                MarkerOptions markerOptions = new MarkerOptions();
-                markerOptions.position(latLng);
-                markerOptions.title("Current Position");
-                markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-                mCurrLocationMarker = mMap.addMarker(markerOptions);
-
-                //move map camera
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 11));
+            if(firstLocationFetch){
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()), 14));
+                firstLocationFetch = false;
             }
 
             // Add a marker for the guest's child location (if available)
@@ -201,12 +202,20 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     //FAB will also prompt a second selection on clicking it?/Just use current location
     @Override
     public void onMapClick(LatLng point){
-
+        if (mCurrLocationMarker != null) {
+            currentDirections.remove();
+            mCurrLocationMarker.remove();
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()), 14));
+        }
     }
 
     @Override
     public boolean onMarkerClick(Marker marker){
-        startMarker = marker;
+        if (mCurrLocationMarker != null) {
+            mCurrLocationMarker.remove();
+        }
+        endMarker = marker;
+        displayRoute(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()), endMarker.getPosition());
         return false;
     }
 
@@ -287,6 +296,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void displayRoute(LatLng start, LatLng end){
+        //Place current location marker
+        LatLng latLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+        MarkerOptions markerOptions = new MarkerOptions();
+        markerOptions.position(latLng);
+        markerOptions.title("Current Position");
+        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+        mCurrLocationMarker = mMap.addMarker(markerOptions);
+
         //ApplicationInfo app = this.getPackageManager().getApplicationInfo("com.nolines.nolines", PackageManager.GET_META_DATA );
         //Bundle bundle = app.metaData;
         //GoogleDirection.withServerKey(bundle.getString("com.google.android.geo.API_KEY"));
@@ -294,27 +311,27 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         GoogleDirection.withServerKey("AIzaSyAr2G3Jc26ZM7EPFB3rr5KMs44OmcThBHk")
                 .from(start)
                 .to(end)
+                .transportMode(TransportMode.WALKING)
                 .execute(this);
     }
 
     @Override
     public void onDirectionSuccess(Direction direction, String rawBody) {
         if(direction.isOK()){
-            //TODO: Snackbar?
             Toast.makeText(this, "Getting directions...", Toast.LENGTH_SHORT).show();
             Route route = direction.getRouteList().get(0);
             ArrayList<LatLng> directionPositionList = route.getLegList().get(0).getDirectionPoint();
-            mMap.addPolyline(DirectionConverter.createPolyline(this, directionPositionList, 5, Color.RED));
+            currentDirections = mMap.addPolyline(DirectionConverter.createPolyline(this,
+                    directionPositionList, 5, Color.RED));
             setCameraWithinCoordinationBounds(route);
         }else{
-            Toast.makeText(this, "Error getting Directions", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, direction.getErrorMessage(), Toast.LENGTH_LONG).show();
         }
     }
 
     @Override
     public void onDirectionFailure(Throwable t) {
-        //TODO: Snackbar?
-        Toast.makeText(this, t.getMessage(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, t.getMessage(), Toast.LENGTH_LONG).show();
     }
 
     private void setCameraWithinCoordinationBounds(Route route){
@@ -322,5 +339,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         LatLng ne = route.getBound().getNortheastCoordination().getCoordination();
         LatLngBounds bounds = new LatLngBounds(sw, ne);
         mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100));
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (v.getId() == R.id.dirFab) {
+            displayRoute(mCurrLocationMarker.getPosition(), endMarker.getPosition());
+        }
     }
 }
