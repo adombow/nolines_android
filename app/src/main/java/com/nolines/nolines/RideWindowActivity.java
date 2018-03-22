@@ -13,7 +13,7 @@ import com.nolines.nolines.api.models.Ride;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PickTicketTimeActivity extends AppCompatActivity
+public class RideWindowActivity extends AppCompatActivity
         implements RideWindowFragment.OnListFragmentInteractionListener {
 
     private TextView textView;

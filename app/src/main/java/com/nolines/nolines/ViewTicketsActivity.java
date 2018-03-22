@@ -1,11 +1,7 @@
 package com.nolines.nolines;
 
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -14,21 +10,19 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ImageView;
 
-import java.io.IOException;
-import java.io.InputStream;
+import com.nolines.nolines.api.models.Ticket;
 
-public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+public class ViewTicketsActivity extends AppCompatActivity
+        implements NavigationView.OnNavigationItemSelectedListener,
+        TicketFragment.OnListFragmentInteractionListener{
 
     DrawerLayout drawer;
-    private ImageView mImageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_view_tickets);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -40,21 +34,6 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
-        mImageView = findViewById(R.id.imageView2);
-        try {
-            // get input stream
-            InputStream ims = getAssets().open("logo.png");
-            // load image as Drawable
-            Drawable d = Drawable.createFromStream(ims, null);
-            // set image to ImageView
-
-            mImageView.setImageDrawable(d);
-            ims.close();
-        }
-        catch(IOException ex) {
-        }
-
     }
 
     @Override
@@ -69,7 +48,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+        getMenuInflater().inflate(R.menu.view_tickets, menu);
         return true;
     }
 
@@ -105,10 +84,9 @@ public class MainActivity extends AppCompatActivity
             Intent intent = new Intent(this, TicketSelectActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_Tickets){
-            Intent intent = new Intent(this, ViewTicketsActivity.class);
-            startActivity(intent);
-        } else if (id == R.id.nav_About) {
             drawer.closeDrawer(GravityCompat.START);
+        } else if (id == R.id.nav_About) {
+
         } else if (id == R.id.nav_share) {
 
         } else if (id == R.id.nav_send) {
@@ -119,5 +97,10 @@ public class MainActivity extends AppCompatActivity
             drawer.closeDrawer(GravityCompat.START);
         }
         return true;
+    }
+
+    @Override
+    public void onListFragmentInteraction(Ticket ticket){
+
     }
 }

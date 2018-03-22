@@ -28,7 +28,7 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_ar"
             android:screenOrientation="landscape"
-            android:theme="@style/FullscreenTheme" >
+            android:theme="@style/FullscreenTheme">
         </activity>
 
         <meta-data
@@ -48,7 +48,7 @@
                 android:value="com.nolines.nolines.MainActivity" />
         </activity>
         <activity
-            android:name=".PickTicketTimeActivity"
+            android:name=".RideWindowActivity"
             android:label="PickTicketTimeActivity"
             android:parentActivityName=".TicketSelectActivity">
             <meta-data
@@ -71,5 +71,15 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.nolines.nolines.MainActivity" />
         </activity>
+        <activity
+            android:name=".ViewTicketsActivity"
+            android:label="@string/title_activity_view_tickets"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.nolines.nolines.MainActivity" />
+        </activity>
     </application>
+
 </manifest>

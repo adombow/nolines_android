@@ -19,10 +19,10 @@ public class Ride {
     private String maxSpeed;
     @SerializedName("ride_type")
     private String rideType;
-    private int photoID;
+    private String photoURL;
+
     @SerializedName("windows")
     private List<RideWindow> RideWindows;
-
 
     public String getName() {
         return name;
@@ -40,8 +40,8 @@ public class Ride {
         return waitTime;
     }
 
-    public int getPhotoID() {
-        return photoID;
+    public String getPhotoURL() {
+        return photoURL;
     }
 
     public String getMaxSpeed() {
@@ -58,9 +58,5 @@ public class Ride {
 
     public List<RideWindow> getRideWindows() {
         return RideWindows;
-    }
-
-    public void setRideWindows(List<RideWindow> rideWindows) {
-        RideWindows = rideWindows;
     }
 }

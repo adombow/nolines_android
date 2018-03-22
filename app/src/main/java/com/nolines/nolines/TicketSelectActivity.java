@@ -46,7 +46,6 @@ public class TicketSelectActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -82,16 +81,19 @@ public class TicketSelectActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
+        if (id == R.id.nav_AR) {
             Intent intent = new Intent(this, ARActivity.class);
             startActivity(intent);
-        } else if (id == R.id.nav_gallery) {
-//            Intent intent = new Intent(this, MapsDrawerActivity.class);
+        } else if (id == R.id.nav_Map) {
+            //Intent intent = new Intent(this, MapsDrawerActivity.class);
             Intent intent = new Intent(this, MapsActivity.class);
             startActivity(intent);
-        } else if (id == R.id.nav_slideshow) {
+        } else if (id == R.id.nav_Rides){
             drawer.closeDrawer(GravityCompat.START);
-        } else if (id == R.id.nav_manage) {
+        } else if (id == R.id.nav_Tickets){
+            Intent intent = new Intent(this, ViewTicketsActivity.class);
+            startActivity(intent);
+        } else if (id == R.id.nav_About) {
 
         } else if (id == R.id.nav_share) {
 

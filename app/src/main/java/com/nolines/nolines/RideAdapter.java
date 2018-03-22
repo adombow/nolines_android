@@ -1,20 +1,17 @@
 package com.nolines.nolines;
-
-import android.animation.ValueAnimator;
-import android.content.Context;
-import android.content.Intent;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.nolines.nolines.RideFragment.OnListFragmentInteractionListener;
 import com.nolines.nolines.api.models.Ride;
+import com.squareup.picasso.Picasso;
+
 
 import java.util.List;
 
@@ -28,9 +25,11 @@ import butterknife.ButterKnife;
 public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder> {
 
     private final List<Ride> mRides;
+    private final RideFragment.OnListFragmentInteractionListener mListener;
 
-    public RideAdapter(List<Ride> rides) {
+    public RideAdapter(List<Ride> rides, OnListFragmentInteractionListener listener) {
         mRides = rides;
+        mListener = listener;
     }
 
     @Override
@@ -42,7 +41,7 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder
 
     @Override
     public void onBindViewHolder(final RideViewHolder holder, final int position) {
-        //holder.rideImage.setImageResource(mRides.get(position).getPhotoID());
+        //Picasso.get().load(mRides.get(position).getPhotoURL()).into(holder.rideImage);
         holder.rideName.setText(mRides.get(position).getName());
         holder.rideWaitTime.setText(Integer.toString(mRides.get(position).getWaitTime()));
 

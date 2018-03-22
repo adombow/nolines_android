@@ -21,9 +21,6 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.reactivex.Observable;
-import io.reactivex.SingleObserver;
-import io.reactivex.disposables.Disposable;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -37,7 +34,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
  * interface.
  */
 public class RideFragment extends Fragment {
-    private static  final String TAG = "RideFragment";
+    private static final String TAG = "RideFragment";
     private static final String ARG_COLUMN_COUNT = "column-count";
 
     private  OnListFragmentInteractionListener mListener;
@@ -120,8 +117,8 @@ public class RideFragment extends Fragment {
     private void initHTTPClient(){
         /* Modify Later to put baseUrl globally*/
         Retrofit.Builder builder = new Retrofit.Builder()
-                //.baseUrl("http://nolines-production.herokuapp.com/")
-                .baseUrl("http://128.189.90.85:3001/")
+                .baseUrl("http://nolines-production.herokuapp.com/")
+                //.baseUrl("http://128.189.90.85:3001/")
                 .addConverterFactory(GsonConverterFactory.create());
 
         Retrofit retrofit = builder.build();
@@ -149,12 +146,6 @@ public class RideFragment extends Fragment {
             }
         });
 
-
-
-    }
-
-
-    private void getRides(int id){
 
 
     }

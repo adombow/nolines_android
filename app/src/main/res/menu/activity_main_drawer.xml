@@ -5,19 +5,23 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_camera"
+            android:id="@+id/nav_AR"
             android:icon="@drawable/ic_menu_camera"
             android:title="@string/drawer_AR" />
         <item
-            android:id="@+id/nav_gallery"
+            android:id="@+id/nav_Map"
             android:icon="@drawable/ic_menu_gallery"
             android:title="@string/drawer_map" />
         <item
-            android:id="@+id/nav_slideshow"
+            android:id="@+id/nav_Rides"
             android:icon="@drawable/ic_menu_slideshow"
             android:title="@string/drawer_ticket_select" />
         <item
-            android:id="@+id/nav_manage"
+            android:id="@+id/nav_Tickets"
+            android:icon="@android:drawable/star_big_off"
+            android:title="@string/view_tickets" />
+        <item
+            android:id="@+id/nav_About"
             android:icon="@drawable/ic_menu_manage"
             android:title="@string/drawer_about" />
     </group>
