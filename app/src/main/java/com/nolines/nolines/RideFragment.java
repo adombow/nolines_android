@@ -12,12 +12,18 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.nolines.nolines.api.models.Ride;
+import com.nolines.nolines.api.models.RideWindow;
 import com.nolines.nolines.api.service.NoLinesClient;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.reactivex.Observable;
+import io.reactivex.SingleObserver;
+import io.reactivex.disposables.Disposable;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -32,10 +38,13 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 public class RideFragment extends Fragment {
     private static  final String TAG = "RideFragment";
-
     private static final String ARG_COLUMN_COUNT = "column-count";
-    private int mColumnCount = 2;
-    private OnListFragmentInteractionListener mListener;
+
+    private  OnListFragmentInteractionListener mListener;
+
+    private RideAdapter mAdapter;
+
+    private NoLinesClient client;
 
     @BindView(R.id.ridelist) RecyclerView recyclerView;
     /**
@@ -59,11 +68,7 @@ public class RideFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Log.v(TAG,TAG);
-        if (getArguments() != null) {
-            mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
-        }
-
+        initHTTPClient();
         getRides();
     }
 
@@ -112,23 +117,30 @@ public class RideFragment extends Fragment {
         void onListFragmentInteraction(Ride ride);
     }
 
-    private void getRides(){
-
+    private void initHTTPClient(){
         /* Modify Later to put baseUrl globally*/
         Retrofit.Builder builder = new Retrofit.Builder()
-                .baseUrl("http://nolines-production.herokuapp.com/")
+                //.baseUrl("http://nolines-production.herokuapp.com/")
+                .baseUrl("http://128.189.90.85:3001/")
                 .addConverterFactory(GsonConverterFactory.create());
 
         Retrofit retrofit = builder.build();
 
-        NoLinesClient client = retrofit.create(NoLinesClient.class);
-        Call<List<Ride>> call = client.getRides();
+        client = retrofit.create(NoLinesClient.class);
+    }
 
-        call.enqueue(new Callback<List<Ride>>() {
+    private void getRides(){
+
+
+        Call<List<Ride>> rideCall = client.getRides();
+        rideCall.enqueue(new Callback<List<Ride>>() {
+
             @Override
             public void onResponse(Call<List<Ride>> call, Response<List<Ride>> response) {
                 List<Ride> rides = response.body();
-                recyclerView.setAdapter(new RideAdapter(rides));
+
+                mAdapter = new RideAdapter(rides);
+                recyclerView.setAdapter(mAdapter);
             }
 
             @Override
@@ -136,5 +148,14 @@ public class RideFragment extends Fragment {
                 Toast.makeText(getActivity(),"Network Error",Toast.LENGTH_SHORT).show();
             }
         });
+
+
+
+    }
+
+
+    private void getRides(int id){
+
+
     }
 }

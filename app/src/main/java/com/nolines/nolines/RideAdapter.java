@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -45,19 +46,9 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder
         holder.rideName.setText(mRides.get(position).getName());
         holder.rideWaitTime.setText(Integer.toString(mRides.get(position).getWaitTime()));
 
-        holder.cardView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Ride currentRide = mRides.get(position);
-
-                holder.toggleCardViewHeight(500);
-                /*
-                Context context = view.getContext();
-                Intent intent = new Intent(context, PickTicketTimeActivity.class);
-                intent.putExtra("RideName", currentRide.getName());
-                context.startActivity(intent);*/
-            }
-        });
+        holder.button1.setText("1");
+        holder.button2.setText("2");
+        holder.button3.setText("3");
     }
 
     @Override
@@ -76,72 +67,20 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder
         @BindView(R.id.ride_wait) TextView rideWaitTime;
         @BindView(R.id.ride_photo) ImageView rideImage;
 
+        @BindView(R.id.button1) Button button1;
+        @BindView(R.id.button2) Button button2;
+        @BindView(R.id.button3) Button button3;
+
         int minHeight;
 
         public RideViewHolder(View view) {
             super(view);
             ButterKnife.bind(this,view);
 
-            cardView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
 
-                @Override
-                public boolean onPreDraw() {
-                    cardView.getViewTreeObserver().removeOnPreDrawListener(this);
-                    minHeight= cardView.getHeight();
-                    ViewGroup.LayoutParams layoutParams = cardView.getLayoutParams();
-                    layoutParams.height = minHeight;
-                    cardView.setLayoutParams(layoutParams);
-
-                    return true;
-                }
-            });
 
         }
 
-        private void toggleCardViewHeight(int height) {
 
-            if (cardView.getHeight() == minHeight) {
-                // expand
-                expandView(height); //'height' is the height of screen which we have measured already.
-
-            } else {
-                // collapse
-                collapseView();
-
-            }
-        }
-
-        public void collapseView() {
-
-            ValueAnimator anim = ValueAnimator.ofInt(cardView.getMeasuredHeightAndState(),
-                    minHeight);
-            anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                @Override
-                public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                    int val = (Integer) valueAnimator.getAnimatedValue();
-                    ViewGroup.LayoutParams layoutParams = cardView.getLayoutParams();
-                    layoutParams.height = val;
-                    cardView.setLayoutParams(layoutParams);
-
-                }
-            });
-            anim.start();
-        }
-        public void expandView(int height) {
-
-            ValueAnimator anim = ValueAnimator.ofInt(cardView.getMeasuredHeightAndState(),
-                    height);
-            anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                @Override
-                public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                    int val = (Integer) valueAnimator.getAnimatedValue();
-                    ViewGroup.LayoutParams layoutParams = cardView.getLayoutParams();
-                    layoutParams.height = val;
-                    cardView.setLayoutParams(layoutParams);
-                }
-            });
-            anim.start();
-
-        }
     }
 }

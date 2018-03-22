@@ -212,7 +212,7 @@ public class ARActivity extends AppCompatActivity implements CameraBridgeViewBas
         LinkedList<DMatch> good_matches1 = new LinkedList<>();
         for (Iterator<MatOfDMatch> iterator = matches12.iterator(); iterator.hasNext();) {
             MatOfDMatch matOfDMatch = (MatOfDMatch) iterator.next();
-            if (matOfDMatch.toArray().length >= 2 && matOfDMatch.toArray()[0].distance / matOfDMatch.toArray()[1].distance < 0.9) {
+            if (matOfDMatch.toArray().length >= 2 && matOfDMatch.toArray()[0].distance / matOfDMatch.toArray()[1].distance < 0.8) {
                 good_matches1.add(matOfDMatch.toArray()[0]);
 
                 Double dist = (double) matOfDMatch.toArray()[0].distance;
@@ -307,7 +307,7 @@ public class ARActivity extends AppCompatActivity implements CameraBridgeViewBas
                 drawnMatches,
                 0);
 
-        if(best_matches.size() > 500    ){
+        if(best_matches.size() > 10    ){
             LinkedList<Point> srcPointList = new LinkedList<Point>();
             LinkedList<Point> inputPointList = new LinkedList<Point>();
 

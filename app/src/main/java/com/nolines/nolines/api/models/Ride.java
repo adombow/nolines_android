@@ -2,11 +2,14 @@ package com.nolines.nolines.api.models;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.List;
+
 /**
  * Created by timot on 3/14/2018.
  */
 
 public class Ride {
+    private int id;
     private String name;
     private Double lat;
     private Double lon;
@@ -17,14 +20,8 @@ public class Ride {
     @SerializedName("ride_type")
     private String rideType;
     private int photoID;
-
-    public Ride(String name, Double lat, Double lon, int wait_time, int photoID) {
-        this.name = name;
-        this.lat = lat;
-        this.lon = lon;
-        this.waitTime = wait_time;
-        this.photoID = photoID;
-    }
+    @SerializedName("windows")
+    private List<RideWindow> RideWindows;
 
 
     public String getName() {
@@ -53,5 +50,17 @@ public class Ride {
 
     public String getRideType() {
         return rideType;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public List<RideWindow> getRideWindows() {
+        return RideWindows;
+    }
+
+    public void setRideWindows(List<RideWindow> rideWindows) {
+        RideWindows = rideWindows;
     }
 }
