@@ -2,10 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://F:\UBC\CPEN_391_Repo\nolines_android\NoLines.iml" filepath="F:\UBC\CPEN_391_Repo\nolines_android\NoLines.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/nolines_android.iml" filepath="$PROJECT_DIR$/nolines_android.iml" />
-      <module fileurl="file://C:\Users\timot\AndroidStudioProjects\NoLines\nolines_android.iml" filepath="C:\Users\timot\AndroidStudioProjects\NoLines\nolines_android.iml" />
       <module fileurl="file://$PROJECT_DIR$/opencv/opencv.iml" filepath="$PROJECT_DIR$/opencv/opencv.iml" />
     </modules>
   </component>

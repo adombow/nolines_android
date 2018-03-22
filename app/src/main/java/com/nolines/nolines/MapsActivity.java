@@ -1,6 +1,7 @@
 package com.nolines.nolines;
 
 import android.Manifest;
+import android.support.v4.app.Fragment;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -26,6 +27,11 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.nolines.nolines.api.models.Ride;
+import com.nolines.nolines.api.models.RidesHolder;
+import com.nolines.nolines.api.models.Ticket;
+
+import java.util.List;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -35,6 +41,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     Location mLastLocation;
     Marker mCurrLocationMarker;
     FusedLocationProviderClient mFusedLocationClient;
+
+    Marker mChildLocationMarker;
+    Location mChildLastLocation = null;
+    List<Ticket> tickets;
+    RidesHolder rides;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,10 +106,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
 
-        // Add a marker in Sydney and move the camera
-        //LatLng sydney = new LatLng(-34, 151);
-        //mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        // Add marker's for the park's rides
+        //TODO: find way to get this to alert when rides are retrieved
+        //Now if rides take a minute to fetch this is just skipped
+        rides = RidesHolder.getInstance(this);
+        rides.refreshRides();
+        if(!rides.isEmpty()) {
+            for (int i = 0; i < rides.numRides(); i++) {
+                LatLng latLng = new LatLng(rides.getItem(i).getLat(), rides.getItem(i).getLon());
+                MarkerOptions markerOptions = new MarkerOptions();
+                markerOptions.position(latLng);
+                markerOptions.title(rides.getItem(i).getName());
+                markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN));
+                if (tickets != null && !tickets.isEmpty()) {
+                    for (Ticket ticket : tickets) {
+                        if (ticket.getRideName().equals(rides.getItem(i).getName()))
+                            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(
+                                    BitmapDescriptorFactory.HUE_YELLOW));
+                    }
+                }
+                mMap.addMarker(markerOptions);
+            }
+        }
     }
 
     LocationCallback mLocationCallback = new LocationCallback(){
@@ -116,13 +145,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 MarkerOptions markerOptions = new MarkerOptions();
                 markerOptions.position(latLng);
                 markerOptions.title("Current Position");
-                markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
+                markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
                 mCurrLocationMarker = mMap.addMarker(markerOptions);
 
                 //move map camera
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 11));
             }
-        };
+
+            // Add a marker for the guest's child location (if available)
+
+            //mChildLastLocation = ;  //Get the new child location
+            if(mChildLocationMarker != null) {
+                mChildLocationMarker.remove();
+                LatLng latLng = new LatLng(mChildLastLocation.getLatitude(), mChildLastLocation.getLongitude());
+                MarkerOptions markerOptions = new MarkerOptions();
+                markerOptions.position(latLng);
+                markerOptions.title("Your child");
+                markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                mChildLocationMarker = mMap.addMarker(markerOptions);
+            }
+        }
     };
 
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;

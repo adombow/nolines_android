@@ -16,14 +16,14 @@ public class Ride {
     private String maxSpeed;
     @SerializedName("ride_type")
     private String rideType;
-    private int photoID;
+    private String photoURL;
 
-    public Ride(String name, Double lat, Double lon, int wait_time, int photoID) {
+    public Ride(String name, Double lat, Double lon, int wait_time, String photoURL) {
         this.name = name;
         this.lat = lat;
         this.lon = lon;
         this.waitTime = wait_time;
-        this.photoID = photoID;
+        this.photoURL = photoURL;
     }
 
 
@@ -43,8 +43,8 @@ public class Ride {
         return waitTime;
     }
 
-    public int getPhotoID() {
-        return photoID;
+    public String getPhotoURL() {
+        return photoURL;
     }
 
     public String getMaxSpeed() {

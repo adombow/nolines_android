@@ -8,8 +8,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.nolines.nolines.TicketFragment.OnListFragmentInteractionListener;
-import com.nolines.nolines.Web.Ticket;
-import com.nolines.nolines.dummy.DummyContent.DummyItem;
+import com.nolines.nolines.api.models.Ticket;
 
 import java.util.List;
 
@@ -36,9 +35,9 @@ public class TicketRecyclerViewAdapter extends RecyclerView.Adapter<TicketRecycl
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position) {
-        holder.rideName.setText(mTickets.get(position).getRide_name());
-        holder.startTime.setText(mTickets.get(position).getStart_time());
-        holder.end_time.setText(mTickets.get(position).getEnd_time());
+        holder.rideName.setText(mTickets.get(position).getRideName());
+        holder.startTime.setText(mTickets.get(position).getStartTime());
+        holder.end_time.setText(mTickets.get(position).getEndTime());
 
         holder.cv.setOnClickListener(new View.OnClickListener() {
             @Override

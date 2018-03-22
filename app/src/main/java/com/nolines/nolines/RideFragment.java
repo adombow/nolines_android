@@ -128,7 +128,7 @@ public class RideFragment extends Fragment {
             @Override
             public void onResponse(Call<List<Ride>> call, Response<List<Ride>> response) {
                 List<Ride> rides = response.body();
-                recyclerView.setAdapter(new RideAdapter(rides));
+                recyclerView.setAdapter(new RideAdapter(rides, mListener));
             }
 
             @Override

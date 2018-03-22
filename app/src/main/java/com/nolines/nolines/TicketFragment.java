@@ -10,13 +10,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.nolines.nolines.Web.Ride;
-import com.nolines.nolines.Web.Ticket;
-import com.nolines.nolines.dummy.DummyContent;
-import com.nolines.nolines.dummy.DummyContent.DummyItem;
+import com.nolines.nolines.api.models.Ticket;
+import com.nolines.nolines.api.service.NoLinesClient;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 /**
  * A fragment representing a list of Items.
