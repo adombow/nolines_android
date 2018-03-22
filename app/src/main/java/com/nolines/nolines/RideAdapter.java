@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.nolines.nolines.RideFragment.OnListFragmentInteractionListener;
 import com.nolines.nolines.api.models.Ride;
+import com.squareup.picasso.Picasso;
 
 
 import java.util.List;
@@ -39,22 +40,22 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder
 
     @Override
     public void onBindViewHolder(final RideViewHolder holder, final int position) {
-        holder.rideImage.setImageResource(mRides.get(position).getPhotoID());
+        //Picasso.get().load(mRides.get(position).getPhotoURL()).into(holder.rideImage);
         holder.rideName.setText(mRides.get(position).getName());
         String waitTimeString = "Wait time: " + Integer.toString(mRides.get(position).getWaitTime());
         holder.rideWaitTime.setText(waitTimeString);
 
-        holder.cv.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Ride currentRide = mRides.get(position);
-                Context context = view.getContext();
-                Intent intent = new Intent(context, RideWindowActivity.class);
-                intent.putExtra("RideName", currentRide.getName());
-                context.startActivity(intent);
-                mListener.onListFragmentInteraction(mRides.get(position));
-            }
-        });
+//        holder.cv.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Ride currentRide = mRides.get(position);
+//                Context context = view.getContext();
+//                Intent intent = new Intent(context, RideWindowActivity.class);
+//                intent.putExtra("RideName", currentRide.getName());
+//                context.startActivity(intent);
+//                mListener.onListFragmentInteraction(mRides.get(position));
+//            }
+//        });
     }
 
     @Override

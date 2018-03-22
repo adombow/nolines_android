@@ -6,11 +6,10 @@
 
     <string name="action_settings">Settings</string>
 
-    <string name="title_activity_ar">ARActivity</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
-    <string name="title_activity_map_">Map_Activity</string>
 
+    <!-- Drawer Entries -->
     <string name="drawer_map">Map View</string>
     <string name="drawer_ticket_select">View Rides</string>
     <string name="drawer_AR">ARActivity</string>
@@ -19,10 +18,18 @@
 
     <string name="wait_time">Wait Time: </string>
 
+    <!-- Activities -->
+    <string name="title_activity_ar">ARActivity</string>
     <string name="title_activity_ticket_select">TicketSelectActivity</string>
     <string name="title_activity_pick_ticket_time">PickTicketTimeActivity</string>
     <string name="title_activity_maps">Map</string>
+    <string name="title_activity_map_">Map_Activity</string>
     <string name="title_activity_maps_drawer">MapsDrawerActivity</string>
     <string name="title_activity_view_tickets">ViewTicketsActivity</string>
+
+    <!--    Permissions    -->
+    <string name="permission_rationale_location">Access to the location service is required to view the park map.</string>
+    <string name="location_permission_denied">This app requires location permission to enable the park map and ticket alerts.\n Please try again and grant access to use the location.</string>
+    <string name="permission_required_toast">Location permission is required for this app\\'s map view.</string>
 
 </resources>

@@ -3,8 +3,10 @@ package com.nolines.nolines.api.models;
 import android.content.Context;
 import android.widget.Toast;
 import com.nolines.nolines.api.service.NoLinesClient;
+import com.nolines.nolines.api.service.Updateable;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -21,6 +23,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
  Singleton class for a Global ride list
  */
 public class RidesHolder {
+
+    private List<Updateable> listeners = new ArrayList<Updateable>();
 
     private static class Holder{
         private static final RidesHolder INSTANCE = new RidesHolder();
@@ -56,6 +60,12 @@ public class RidesHolder {
             @Override
             public void onResponse(Call<List<Ride>> call, Response<List<Ride>> response) {
                 rides = response.body();
+                for(Updateable listener : listeners){
+                    try{
+                        listener.onRidesUpdate();
+                    } catch(Throwable t){
+                    }
+                }
             }
 
             @Override
@@ -63,5 +73,15 @@ public class RidesHolder {
                 Toast.makeText(mContext.get(),"Network Error",Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    public void registerListener(Updateable listener){
+        if(!listeners.contains(listener))
+            listeners.add(listener);
+    }
+
+    public void unregisterListener(Updateable listener){
+        if(listener != null && listeners.contains(listener))
+            listeners.remove(listeners.indexOf(listener));
     }
 }

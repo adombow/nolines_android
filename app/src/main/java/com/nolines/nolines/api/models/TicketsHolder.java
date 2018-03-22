@@ -1,5 +1,10 @@
 package com.nolines.nolines.api.models;
 
+import android.content.Context;
+
+import com.nolines.nolines.api.service.Updateable;
+
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,16 +17,37 @@ import java.util.List;
  */
 public class TicketsHolder {
 
+    private List<Updateable> listeners = new ArrayList<Updateable>();
+
     private static class Holder{
         private static final TicketsHolder INSTANCE = new TicketsHolder();
     }
 
     private List<Ticket> tickets;
+    private static WeakReference<Context> mContext;
 
-    private TicketsHolder() {tickets = new ArrayList<Ticket>();}
-    public static TicketsHolder getInstance() {return Holder.INSTANCE;}
+    private TicketsHolder() { getTickets(); }
+    public static TicketsHolder getInstance(Context context) {
+        mContext = new WeakReference<Context>(context);
+        return Holder.INSTANCE;
+    }
 
-    public void addItem(Ticket ticket) {this.tickets.add(ticket);}
-    public void removeItem(int pos) {this.tickets.remove(pos);}
-    public Ticket getItem(int pos) {return this.tickets.get(pos);}
+    public Ticket getItem(int pos) { return this.tickets.get(pos); }
+    public void refreshTickets() { getTickets(); }
+    public boolean isEmpty() { return tickets == null || tickets.isEmpty(); }
+    public int numTickets() { return tickets.size(); }
+
+    private void getTickets(){
+
+    }
+
+    public void registerListener(Updateable listener){
+        if(!listeners.contains(listener))
+            listeners.add(listener);
+    }
+
+    public void unregisterListener(Updateable listener){
+        if(listener != null && listeners.contains(listener))
+            listeners.remove(listeners.indexOf(listener));
+    }
 }
