@@ -74,10 +74,7 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder
 
         public RideViewHolder(View view) {
             super(view);
-            ButterKnife.bind(this,view);
-
-
-
+            ButterKnife.bind(this, view);
         }
 
 

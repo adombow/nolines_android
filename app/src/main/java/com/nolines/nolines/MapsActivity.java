@@ -1,6 +1,8 @@
 package com.nolines.nolines;
 
 import android.Manifest;
+import android.app.Activity;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
@@ -11,7 +13,11 @@ import android.support.v4.app.ActivityCompat;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.akexorcist.googledirection.DirectionCallback;
@@ -35,15 +41,16 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
-import com.google.android.gms.maps.model.PolylineOptions;
+import com.nolines.nolines.api.models.GuestHolder;
+import com.nolines.nolines.api.models.Ride;
 import com.nolines.nolines.api.models.RidesHolder;
-import com.nolines.nolines.api.models.Ticket;
 import com.nolines.nolines.api.service.Updateable;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback,
         Updateable,
@@ -52,10 +59,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         GoogleMap.OnMyLocationClickListener,
         GoogleMap.OnMapClickListener,
         GoogleMap.OnMarkerClickListener,
+        GoogleMap.OnInfoWindowCloseListener,
+        GoogleMap.OnInfoWindowClickListener,
         DirectionCallback,
         View.OnClickListener{
 
-    @BindView(R.id.dirFab) FloatingActionButton FindDirectionsBtn;
+    @BindView(R.id.dirFab) FloatingActionButton findDirectionsBtn;
 
     /**
      * Request code for location permission request.
@@ -79,10 +88,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     Marker mChildLocationMarker;
     Location mChildLastLocation = null;
-    List<Ticket> tickets;
+    GuestHolder guest;
     RidesHolder rides;
 
-    Marker endMarker;
+    Marker lastSelectedMarker;
     Polyline currentDirections;
     boolean firstLocationFetch = true;
 
@@ -90,8 +99,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
-
-        //FindDirectionsBtn.hide();
+        ButterKnife.bind(this);
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -110,6 +118,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         //Refresh the park's rides from the server
         rides = RidesHolder.getInstance(this);
         rides.registerListener(this);
+        //Refresh the current guest from the server
+        guest = GuestHolder.getInstance(this);
+        guest.registerListener(this);
+
+        //Start the directions button as hidden
+        findDirectionsBtn.hide();
+        findDirectionsBtn.setOnClickListener(this);
     }
 
     @Override
@@ -139,6 +154,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.setOnMapClickListener(this);
         mMap.setOnMyLocationButtonClickListener(this);
         mMap.setOnMyLocationClickListener(this);
+        mMap.getUiSettings().setMapToolbarEnabled(false);
+        mMap.setOnInfoWindowCloseListener(this);
+        mMap.setOnInfoWindowClickListener(this);
+        mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter());
+
         enableMyLocation();
 
         //Start fetching the rides to display
@@ -197,15 +217,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             mMap.setMyLocationEnabled(true);
         }
     }
-
-    //TODO: Add code here to hide/unhide FAB to get direction, then listener for FAB to show directions
-    //FAB will also prompt a second selection on clicking it?/Just use current location
+    
     @Override
     public void onMapClick(LatLng point){
         if (mCurrLocationMarker != null) {
             currentDirections.remove();
             mCurrLocationMarker.remove();
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()), 14));
+            findDirectionsBtn.hide();
         }
     }
 
@@ -214,8 +233,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (mCurrLocationMarker != null) {
             mCurrLocationMarker.remove();
         }
-        endMarker = marker;
-        displayRoute(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()), endMarker.getPosition());
+        if(marker.equals(lastSelectedMarker)){
+            return true;
+        }
+        lastSelectedMarker = marker;
+        findDirectionsBtn.show();
+        marker.showInfoWindow();
         return false;
     }
 
@@ -228,6 +251,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onMyLocationClick(Location location) {
+    }
+
+    @Override
+    public void onInfoWindowClick(Marker marker){
+        Toast.makeText(this, "Info Window Clicked!", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onInfoWindowClose(Marker marker){
+        //Toast.makeText(this, "Info Window Closed!", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -250,31 +283,35 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onRidesUpdate(){
         // Add marker's for the park's rides
-        //TODO: find way to get this to alert when rides are retrieved
-        //Now if rides take a minute to fetch this is just skipped
         if(!rides.isEmpty()) {
-            for (int i = 0; i < rides.numRides(); i++) {
-                LatLng latLng = new LatLng(rides.getItem(i).getLat(), rides.getItem(i).getLon());
+            for (int i = 0; i < rides.getRideList().size(); i++) {
+                LatLng latLng = new LatLng(rides.getRideList().get(i).getLat(), rides.getRideList().get(i).getLon());
                 MarkerOptions markerOptions = new MarkerOptions();
                 markerOptions.position(latLng);
-                markerOptions.title(rides.getItem(i).getName());
+                markerOptions.title(rides.getRideList().get(i).getName());
                 markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN));
-                if (tickets != null && !tickets.isEmpty()) {
-                    for (Ticket ticket : tickets) {
-                        if (ticket.getRideName().equals(rides.getItem(i).getName()))
-                            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(
-                                    BitmapDescriptorFactory.HUE_YELLOW));
-                    }
-                }
+//                if (!guest.getGuestObject().getTickets().isEmpty()) {
+//                    for (Ticket ticket : guest.getGuestObject().getTickets()) {
+//                        if (ticket.getRideName().equals(rides.getRideList().get(i).getName()))
+//                            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(
+//                                    BitmapDescriptorFactory.HUE_YELLOW));
+//                    }
+//                }
                 mMap.addMarker(markerOptions);
             }
         }
     }
 
     @Override
+    public void onGuestUpdate(){
+
+    }
+
+    @Override
     public void onDestroy(){
         super.onDestroy();
         rides.unregisterListener(this);
+        guest.unregisterListener(this);
     }
 
     @Override
@@ -344,7 +381,70 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.dirFab) {
-            displayRoute(mCurrLocationMarker.getPosition(), endMarker.getPosition());
+            if(mCurrLocationMarker != null)
+                mCurrLocationMarker.remove();
+            LatLng latLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+            MarkerOptions markerOptions = new MarkerOptions();
+            markerOptions.position(latLng);
+            markerOptions.title("Your location");
+            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+            mCurrLocationMarker = mMap.addMarker(markerOptions);
+            displayRoute(mCurrLocationMarker.getPosition(), lastSelectedMarker.getPosition());
+        }
+    }
+
+    //Class for our custom info window when marker clicked
+    class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter{
+        @BindView(R.id.markerpic) ImageView markerPic;
+        @BindView(R.id.markername) TextView markerName;
+        @BindView(R.id.markerinfo) TextView markerInfo;
+
+        //private final View mWindow;
+        private final View mContents;
+
+        public CustomInfoWindowAdapter(){
+            //mWindow = getLayoutInflater().inflate(R.layout.maps_custom_info_window, null);
+            mContents = getLayoutInflater().inflate(R.layout.maps_custom_info_contents, null);
+            ButterKnife.bind(this, mContents);
+        }
+
+        @Override
+        public View getInfoWindow(Marker marker){
+            //Add check here and return window, otherwise null will give just contents instead
+            return null;
+            //render(marker, mWindow);
+            //return mWindow;
+        }
+
+        @Override
+        public View getInfoContents(Marker marker){
+            render(marker, mContents);
+            return mContents;
+        }
+
+        private void render(Marker marker, View view){
+            //Make everything blank in case we don't find the ride
+            markerPic.setImageResource(0);
+            markerName.setText("");
+            markerInfo.setText("");
+            for(Ride ride : rides.getRideList()){
+                if(marker.getTitle().equals(ride.getName())) {
+                    Picasso.get().load(ride.getPhotoURL()).into(markerPic);
+
+                    if( !ride.getName().equals("") ){
+                        SpannableString titleText = new SpannableString(ride.getName());
+                        titleText.setSpan(new ForegroundColorSpan(Color.RED), 0, titleText.length(), 0);
+                        markerName.setText(titleText);
+                    }
+
+                    if( !ride.getRideType().equals("") ) {
+                        SpannableString infoText = new SpannableString(ride.getRideType());
+                        infoText.setSpan(new ForegroundColorSpan(Color.MAGENTA), 0, infoText.length(), 0);
+                        markerInfo.setText(infoText);
+                    }
+                    break;
+                }
+            }
         }
     }
 }

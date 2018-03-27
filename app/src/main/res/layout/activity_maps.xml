@@ -19,6 +19,7 @@
         android:layout_gravity="bottom|right"
         android:layout_margin="16dp"
         android:src="@drawable/ic_menu_send"
+        android:visibility="invisible"
         app:backgroundTint="?android:attr/colorPrimary"
         app:elevation="4dp"
         app:layout_anchorGravity="bottom|right|end" />

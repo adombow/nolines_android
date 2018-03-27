@@ -48,6 +48,7 @@ public class RideFragment extends Fragment implements Updateable{
     private RidesHolder rides;
 
     @BindView(R.id.ridelist) RecyclerView recyclerView;
+
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
@@ -130,9 +131,15 @@ public class RideFragment extends Fragment implements Updateable{
 
 
     }
+
     @Override
     public void onRidesUpdate(){
         mAdapter = new RideAdapter(rides.getRideList(),mListener);
         recyclerView.setAdapter(mAdapter);
+    }
+
+    @Override
+    public void onGuestUpdate(){
+
     }
 }

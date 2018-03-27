@@ -15,29 +15,27 @@ import java.util.List;
 /*
  Singleton class for a Global ticket list
  */
-public class TicketsHolder {
+public class GuestHolder {
 
     private List<Updateable> listeners = new ArrayList<Updateable>();
 
     private static class Holder{
-        private static final TicketsHolder INSTANCE = new TicketsHolder();
+        private static final GuestHolder INSTANCE = new GuestHolder();
     }
 
-    private List<Ticket> tickets;
+    private Guest guest;
     private static WeakReference<Context> mContext;
 
-    private TicketsHolder() { getTickets(); }
-    public static TicketsHolder getInstance(Context context) {
+    private GuestHolder() { getGuest(); }
+    public static GuestHolder getInstance(Context context) {
         mContext = new WeakReference<Context>(context);
         return Holder.INSTANCE;
     }
 
-    public Ticket getItem(int pos) { return this.tickets.get(pos); }
-    public void refreshTickets() { getTickets(); }
-    public boolean isEmpty() { return tickets == null || tickets.isEmpty(); }
-    public int numTickets() { return tickets.size(); }
+    public Guest getGuestObject() { return this.guest; }
+    public void refreshGuest() { getGuest(); }
 
-    private void getTickets(){
+    private void getGuest(){
 
     }
 

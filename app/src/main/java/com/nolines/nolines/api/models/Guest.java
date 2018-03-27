@@ -1,6 +1,7 @@
 package com.nolines.nolines.api.models;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by timot on 3/14/2018.
@@ -17,7 +18,5 @@ public class Guest {
     }
 
     public String getName(){ return this.name; }
-    public Ticket getTicket(int index){
-        return tickets.get(index);
-    }
+    public List<Ticket> getTickets(){ return this.tickets; }
 }
