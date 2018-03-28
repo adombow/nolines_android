@@ -28,6 +28,7 @@ public class HomeCardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private final OnListFragmentInteractionListener mListener;
 
     private final int WELCOME_CARD = 0;
+    private final int RIDE_CARD = 0;
 
     public HomeCardAdapter(List<Object> cards, OnListFragmentInteractionListener listener) {
         mCards = cards;
