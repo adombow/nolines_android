@@ -10,14 +10,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.nolines.nolines.adapters.TicketAdapter;
 import com.nolines.nolines.api.models.Ticket;
-import com.nolines.nolines.api.service.NoLinesClient;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 /**
  * A fragment representing a list of Items.
@@ -75,7 +72,7 @@ public class TicketFragment extends Fragment {
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            recyclerView.setAdapter(new TicketRecyclerViewAdapter(tickets, mListener));
+            recyclerView.setAdapter(new TicketAdapter(tickets, mListener));
         }
         return view;
     }

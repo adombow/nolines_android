@@ -1,4 +1,4 @@
-package com.nolines.nolines;
+package com.nolines.nolines.adapters;
 
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.nolines.nolines.R;
 import com.nolines.nolines.TicketFragment.OnListFragmentInteractionListener;
 import com.nolines.nolines.api.models.Ticket;
 
@@ -16,12 +17,12 @@ import java.util.List;
  * {@link RecyclerView.Adapter} that can display a {@link Ticket} and makes a call to the
  * specified {@link OnListFragmentInteractionListener}.
  */
-public class TicketRecyclerViewAdapter extends RecyclerView.Adapter<TicketRecyclerViewAdapter.ViewHolder> {
+public class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.ViewHolder> {
 
     private final List<Ticket> mTickets;
     private final OnListFragmentInteractionListener mListener;
 
-    public TicketRecyclerViewAdapter(List<Ticket> items, OnListFragmentInteractionListener listener) {
+    public TicketAdapter(List<Ticket> items, OnListFragmentInteractionListener listener) {
         mTickets = items;
         mListener = listener;
     }

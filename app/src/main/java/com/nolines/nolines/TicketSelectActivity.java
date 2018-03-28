@@ -95,10 +95,6 @@ public class TicketSelectActivity extends AppCompatActivity
             startActivity(intent);
         } else if (id == R.id.nav_About) {
 
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
         }
 
         if (drawer.isDrawerOpen(GravityCompat.START)) {

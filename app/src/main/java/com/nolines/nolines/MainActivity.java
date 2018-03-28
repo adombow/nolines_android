@@ -2,9 +2,12 @@ package com.nolines.nolines;
 
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -16,11 +19,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 
-import java.io.IOException;
-import java.io.InputStream;
+import com.nolines.nolines.api.models.Ride;
+import com.nolines.nolines.dummy.DummyContent;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener,
+        RideFragment.OnListFragmentInteractionListener,
+        HomeFragment.OnListFragmentInteractionListener
+    {
 
     DrawerLayout drawer;
     private ImageView mImageView;
@@ -41,20 +47,17 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        mImageView = findViewById(R.id.imageView2);
+        Fragment fragment = null;
+        Class fragmentClass = null;
+        fragmentClass = HomeFragment.class;
         try {
-            // get input stream
-            InputStream ims = getAssets().open("logo.png");
-            // load image as Drawable
-            Drawable d = Drawable.createFromStream(ims, null);
-            // set image to ImageView
-
-            mImageView.setImageDrawable(d);
-            ims.close();
-        }
-        catch(IOException ex) {
+            fragment = (Fragment) fragmentClass.newInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.beginTransaction().replace(R.id.frame_layout, fragment).commit();
     }
 
     @Override
@@ -93,8 +96,12 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-
-        if (id == R.id.nav_AR) {
+        Fragment fragment = null;
+        Class fragmentClass = null;
+        if(id == R.id.nav_home){
+            fragmentClass = HomeFragment.class;
+        }
+        else if (id == R.id.nav_AR) {
             Intent intent = new Intent(this, ARActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_Map) {
@@ -102,17 +109,25 @@ public class MainActivity extends AppCompatActivity
             Intent intent = new Intent(this, MapsActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_Rides) {
-            Intent intent = new Intent(this, TicketSelectActivity.class);
-            startActivity(intent);
+            fragmentClass = RideFragment.class;
         } else if (id == R.id.nav_Tickets){
-            Intent intent = new Intent(this, ViewTicketsActivity.class);
-            startActivity(intent);
+            fragmentClass = TicketFragment.class;
         } else if (id == R.id.nav_About) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else if (id == R.id.nav_share) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
+        }
 
-        } else if (id == R.id.nav_send) {
+        if(fragmentClass != null){
+            try {
+                fragment = (Fragment) fragmentClass.newInstance();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 
+        if(fragment != null){
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            fragmentManager.beginTransaction().replace(R.id.frame_layout, fragment).commit();
         }
 
         if (drawer.isDrawerOpen(GravityCompat.START)) {
@@ -120,4 +135,12 @@ public class MainActivity extends AppCompatActivity
         }
         return true;
     }
+
+    @Override
+    public void onListFragmentInteraction(Ride ride){
+
+    }
+
+    @Override
+    public void onListFragmentInteraction(DummyContent.DummyItem item){};
 }

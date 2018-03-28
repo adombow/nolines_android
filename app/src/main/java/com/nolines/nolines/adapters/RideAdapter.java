@@ -1,4 +1,4 @@
-package com.nolines.nolines;
+package com.nolines.nolines.adapters;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -8,9 +8,9 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.nolines.nolines.R;
 import com.nolines.nolines.RideFragment.OnListFragmentInteractionListener;
 import com.nolines.nolines.api.models.Ride;
-import com.squareup.picasso.Picasso;
 
 
 import java.util.List;
@@ -25,7 +25,7 @@ import butterknife.ButterKnife;
 public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder> {
 
     private final List<Ride> mRides;
-    private final RideFragment.OnListFragmentInteractionListener mListener;
+    private final OnListFragmentInteractionListener mListener;
 
     public RideAdapter(List<Ride> rides, OnListFragmentInteractionListener listener) {
         mRides = rides;
@@ -61,7 +61,7 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder
     }
 
     public class RideViewHolder extends RecyclerView.ViewHolder {
-        @BindView(R.id.cardview) CardView cardView;
+        @BindView(R.id.ride_cardview) CardView cardView;
         @BindView(R.id.ride_name) TextView rideName;
         @BindView(R.id.ride_wait) TextView rideWaitTime;
         @BindView(R.id.ride_photo) ImageView rideImage;
@@ -70,13 +70,9 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder
         @BindView(R.id.button2) Button button2;
         @BindView(R.id.button3) Button button3;
 
-        int minHeight;
-
         public RideViewHolder(View view) {
             super(view);
             ButterKnife.bind(this,view);
-
-
 
         }
 

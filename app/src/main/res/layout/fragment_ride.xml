@@ -16,7 +16,7 @@
         app:contentPaddingBottom="10dp"
         app:cardPreventCornerOverlap="true"
         app:cardUseCompatPadding="true"
-        android:id="@+id/cardview">
+        android:id="@+id/ride_cardview">
 
         <RelativeLayout
             android:layout_width="match_parent"
