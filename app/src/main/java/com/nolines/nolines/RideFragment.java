@@ -1,18 +1,31 @@
 package com.nolines.nolines;
 
+import android.app.DatePickerDialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.DatePicker;
+import android.widget.TextView;
 
 import com.nolines.nolines.adapters.RideAdapter;
 import com.nolines.nolines.api.models.Ride;
 import com.nolines.nolines.api.models.RidesHolder;
 import com.nolines.nolines.api.service.Updateable;
+
+import java.text.DateFormat;
+import java.util.Calendar;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -32,7 +45,12 @@ public class RideFragment extends Fragment implements Updateable{
     private RideAdapter mAdapter;
     private RidesHolder rides;
 
-    @BindView(R.id.ridelist) RecyclerView recyclerView;
+    private Calendar calendar;
+
+    @BindView(R.id.recyclerView) RecyclerView recyclerView;
+    @BindView(R.id.toolbar) Toolbar toolbar;
+    @BindView(R.id.window_tabs) TabLayout tabLayout;
+
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
@@ -54,6 +72,8 @@ public class RideFragment extends Fragment implements Updateable{
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        calendar = Calendar.getInstance();
+
         getRides();
     }
 
@@ -62,13 +82,46 @@ public class RideFragment extends Fragment implements Updateable{
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_ride_list, container, false);
 
-        view.setBackgroundColor(Color.BLACK);
-
         ButterKnife.bind(this,view);
+
+        setupToolbar();
+        setupTabs();
+
+        setHasOptionsMenu(true);
 
         return view;
     }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.ride, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.date:
+                DatePickerDialog datePickerDialog = new DatePickerDialog(getContext(), new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                        calendar.set(Calendar.YEAR, year);
+                        calendar.set(Calendar.MONTH, monthOfYear);
+                        calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                        String date = DateFormat.getDateInstance(DateFormat.MEDIUM).format(calendar.getTime());
+                        Log.i(TAG,date);
+                        //btn_dialog_7.setText(date);
+                        //
+                        // dateTextView.setText(date);
+                    }
+                }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
+                datePickerDialog.getDatePicker().setCalendarViewShown(false);
+                datePickerDialog.show();
+
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
     @Override
     public void onAttach(Context context) {
@@ -119,5 +172,47 @@ public class RideFragment extends Fragment implements Updateable{
     public void onRidesUpdate(){
         mAdapter = new RideAdapter(rides.getRideList(),mListener);
         recyclerView.setAdapter(mAdapter);
+    }
+
+    private void setupToolbar(){
+        toolbar.setTitle("Reservations");
+        ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
+        ((MainActivity) getActivity()).setupActionBarDrawerToggle(toolbar);
+    }
+
+    private void setupTabs(){
+        tabLayout.addTab(tabLayout.newTab().setText("Morning"));
+        tabLayout.addTab(tabLayout.newTab().setText("Afternoon"));
+        tabLayout.addTab(tabLayout.newTab().setText("Evening"));
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                int position = tab.getPosition();
+
+                switch(position){
+                    case 0:
+                        mAdapter.setTimeFrame(Ride.MORNING);
+                        break;
+                    case 1:
+                        mAdapter.setTimeFrame(Ride.AFTERNOON);
+                        break;
+                    case 2:
+                        mAdapter.setTimeFrame(Ride.EVENING);
+                        break;
+                }
+
+                mAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+
+            }
+        });
     }
 }

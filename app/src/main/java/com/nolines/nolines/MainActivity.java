@@ -22,31 +22,25 @@ import android.widget.ImageView;
 import com.nolines.nolines.api.models.Ride;
 import com.nolines.nolines.dummy.DummyContent;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         RideFragment.OnListFragmentInteractionListener,
         HomeFragment.OnListFragmentInteractionListener
     {
 
-    DrawerLayout drawer;
-    private ImageView mImageView;
+    @BindView(R.id.drawer_layout) DrawerLayout drawer;
+    @BindView(R.id.nav_view) NavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        ButterKnife.bind(this);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         Fragment fragment = null;
@@ -60,6 +54,13 @@ public class MainActivity extends AppCompatActivity
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit();
+    }
+
+    public void setupActionBarDrawerToggle(Toolbar toolbar) {
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
     }
 
     @Override
@@ -129,7 +130,7 @@ public class MainActivity extends AppCompatActivity
 
         if(fragment != null){
             FragmentManager fragmentManager = getSupportFragmentManager();
-            fragmentManager.beginTransaction().replace(R.id.frame_layout, fragment).commit();
+            fragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit();
         }
 
         if (drawer.isDrawerOpen(GravityCompat.START)) {

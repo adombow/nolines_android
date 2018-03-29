@@ -68,6 +68,7 @@ public class HomeFragment extends Fragment {
 
         toolbar.setTitle("Welcome to NoLines");
         ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
+        ((MainActivity) getActivity()).setupActionBarDrawerToggle(toolbar);
 
         // Set the adapter
         recyclerView.setLayoutManager(new LinearLayoutManager(this.getContext()));

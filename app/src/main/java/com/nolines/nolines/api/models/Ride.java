@@ -23,6 +23,7 @@ public class Ride {
     private String maxSpeed;
     @SerializedName("ride_type")
     private String rideType;
+    @SerializedName("picture_url")
     private String photoURL;
 
     @SerializedName("morning_windows")
