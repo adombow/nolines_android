@@ -13,6 +13,7 @@ public class Ticket {
     private Double lon;
     private int alertsLeft;
     private String alertsMessage;
+    private Ride ride;
 
     public Ticket(String start_time, String end_time, String ride_name, Double lat, Double lon, int alerts_left, String alert_message) {
         this.startTime = start_time;

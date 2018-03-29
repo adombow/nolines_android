@@ -2,9 +2,12 @@ package com.nolines.nolines;
 
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -16,50 +19,52 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 
-import java.io.IOException;
-import java.io.InputStream;
+import com.nolines.nolines.api.models.Ride;
+import com.nolines.nolines.dummy.DummyContent;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener,
+        RideFragment.OnListFragmentInteractionListener,
+        HomeFragment.OnListFragmentInteractionListener
+    {
 
-    DrawerLayout drawer;
-    private ImageView mImageView;
+    @BindView(R.id.drawer_layout) DrawerLayout drawer;
+    @BindView(R.id.nav_view) NavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
-        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ButterKnife.bind(this);
+
+        navigationView.setNavigationItemSelectedListener(this);
+
+        Fragment fragment = null;
+        Class fragmentClass = null;
+        fragmentClass = HomeFragment.class;
+        try {
+            fragment = (Fragment) fragmentClass.newInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit();
+    }
+
+    public void setupActionBarDrawerToggle(Toolbar toolbar) {
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-
-        mImageView = findViewById(R.id.imageView2);
-        try {
-            // get input stream
-            InputStream ims = getAssets().open("logo.png");
-            // load image as Drawable
-            Drawable d = Drawable.createFromStream(ims, null);
-            // set image to ImageView
-
-            mImageView.setImageDrawable(d);
-            ims.close();
-        }
-        catch(IOException ex) {
-        }
-
     }
 
     @Override
     public void onBackPressed() {
-        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -70,8 +75,8 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
+        //getMenuInflater().inflate(R.menu.main, menu);
+        return false;
     }
 
     @Override
@@ -94,23 +99,38 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-
-        if (id == R.id.nav_camera) {
+        Fragment fragment = null;
+        Class fragmentClass = null;
+        if(id == R.id.nav_home){
+            fragmentClass = HomeFragment.class;
+        }
+        else if (id == R.id.nav_AR) {
             Intent intent = new Intent(this, ARActivity.class);
             startActivity(intent);
-        } else if (id == R.id.nav_gallery) {
+        } else if (id == R.id.nav_Map) {
             //Intent intent = new Intent(this, MapsDrawerActivity.class);
             Intent intent = new Intent(this, MapsActivity.class);
             startActivity(intent);
-        } else if (id == R.id.nav_slideshow) {
-            Intent intent = new Intent(this, TicketSelectActivity.class);
+        } else if (id == R.id.nav_Rides) {
+            fragmentClass = RideFragment.class;
+        } else if (id == R.id.nav_Tickets){
+            fragmentClass = TicketFragment.class;
+        } else if (id == R.id.nav_About) {
+            Intent intent = new Intent(this, SettingsActivity.class);
             startActivity(intent);
-        } else if (id == R.id.nav_manage) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else if (id == R.id.nav_share) {
+        }
 
-        } else if (id == R.id.nav_send) {
+        if(fragmentClass != null){
+            try {
+                fragment = (Fragment) fragmentClass.newInstance();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 
+        if(fragment != null){
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            fragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit();
         }
 
         if (drawer.isDrawerOpen(GravityCompat.START)) {
@@ -118,4 +138,12 @@ public class MainActivity extends AppCompatActivity
         }
         return true;
     }
+
+    @Override
+    public void onListFragmentInteraction(Ride ride){
+
+    }
+
+    @Override
+    public void onListFragmentInteraction(DummyContent.DummyItem item){};
 }

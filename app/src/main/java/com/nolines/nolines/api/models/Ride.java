@@ -1,12 +1,19 @@
 package com.nolines.nolines.api.models;
 
+import android.support.annotation.IntDef;
+
 import com.google.gson.annotations.SerializedName;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.List;
 
 /**
  * Created by timot on 3/14/2018.
  */
 
 public class Ride {
+    private int id;
     private String name;
     private Double lat;
     private Double lon;
@@ -16,15 +23,23 @@ public class Ride {
     private String maxSpeed;
     @SerializedName("ride_type")
     private String rideType;
-    private int photoID;
+    @SerializedName("picture_url")
+    private String photoURL;
 
-    public Ride(String name, Double lat, Double lon, int wait_time, int photoID) {
-        this.name = name;
-        this.lat = lat;
-        this.lon = lon;
-        this.waitTime = wait_time;
-        this.photoID = photoID;
-    }
+    @SerializedName("morning_windows")
+    private List<RideWindow> morningWindows;
+    @SerializedName("afternoon_windows")
+    private List<RideWindow> afternoonWindows;
+    @SerializedName("evening_windows")
+    private List<RideWindow> eveningWindows;
+
+    public final static int MORNING = 0;
+    public final static int AFTERNOON = 1;
+    public final static int EVENING = 2;
+
+    @IntDef({MORNING, AFTERNOON, EVENING})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface TimeFrame {}
 
 
     public String getName() {
@@ -43,8 +58,8 @@ public class Ride {
         return waitTime;
     }
 
-    public int getPhotoID() {
-        return photoID;
+    public String getPhotoURL() {
+        return photoURL;
     }
 
     public String getMaxSpeed() {
@@ -54,4 +69,23 @@ public class Ride {
     public String getRideType() {
         return rideType;
     }
+
+    public int getId() {
+        return id;
+    }
+
+    public List<RideWindow> getRideWindows(@TimeFrame int timeframe) {
+
+        switch (timeframe){
+            case MORNING:
+                return morningWindows;
+            case AFTERNOON:
+                return afternoonWindows;
+            case EVENING:
+                return eveningWindows;
+            default:
+                return morningWindows;
+        }
+    }
+
 }
