@@ -187,6 +187,10 @@ public class RideFragment extends Fragment implements Updateable{
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
+
+                if(mAdapter == null)
+                    return;
+
                 int position = tab.getPosition();
 
                 switch(position){
