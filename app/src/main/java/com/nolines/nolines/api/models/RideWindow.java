@@ -15,6 +15,8 @@ public class RideWindow {
     @SerializedName("end_time")
     private String endTime;
 
+    private Date startDate;
+
     public RideWindow(int id, String startTime, String endTime) {
         this.id = id;
         this.startTime = startTime;
@@ -31,5 +33,13 @@ public class RideWindow {
 
     public String getEndTime() {
         return endTime;
+    }
+
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
     }
 }

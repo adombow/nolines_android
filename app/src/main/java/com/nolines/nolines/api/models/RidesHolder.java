@@ -7,7 +7,11 @@ import com.nolines.nolines.api.service.NoLinesClient;
 import com.nolines.nolines.api.service.Updateable;
 
 import java.lang.ref.WeakReference;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import retrofit2.Call;
@@ -15,6 +19,10 @@ import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+
+import static com.nolines.nolines.api.models.Ride.AFTERNOON;
+import static com.nolines.nolines.api.models.Ride.EVENING;
+import static com.nolines.nolines.api.models.Ride.MORNING;
 
 /**
  * Created by Andrew on 2018-03-20.
@@ -52,7 +60,7 @@ public class RidesHolder {
         /* Modify Later to put baseUrl globally*/
         Retrofit.Builder builder = new Retrofit.Builder()
                 //.baseUrl("http://nolines-production.herokuapp.com/")
-                .baseUrl("http://128.189.92.71:3001/")
+                .baseUrl("http://192.168.1.83:3001/")
                 .addConverterFactory(GsonConverterFactory.create());
 
         Retrofit retrofit = builder.build();
@@ -65,6 +73,7 @@ public class RidesHolder {
             public void onResponse(Call<List<Ride>> call, Response<List<Ride>> response) {
                 Log.i(TAG, "Repsonse Recieved");
                 rides = response.body();
+
                 for(Updateable listener : listeners){
                     try{
                         listener.onRidesUpdate();

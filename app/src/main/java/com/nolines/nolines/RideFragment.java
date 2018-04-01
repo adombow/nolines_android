@@ -170,7 +170,7 @@ public class RideFragment extends Fragment implements Updateable{
     }
     @Override
     public void onRidesUpdate(){
-        mAdapter = new RideAdapter(rides.getRideList(),mListener);
+        mAdapter = new RideAdapter(rides.getRideList(),mListener,this.getContext());
         recyclerView.setAdapter(mAdapter);
     }
 
