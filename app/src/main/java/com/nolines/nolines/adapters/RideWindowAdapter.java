@@ -5,8 +5,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.Toast;
 
 import com.nolines.nolines.R;
 import com.nolines.nolines.RideFragment;
@@ -14,7 +14,6 @@ import com.nolines.nolines.api.models.RideWindow;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 
@@ -29,7 +28,7 @@ import butterknife.ButterKnife;
 public class RideWindowAdapter extends RecyclerView.Adapter<RideWindowAdapter.RideWindowViewHolder> {
 
     private final List<RideWindow> mRideWindows;
-    private RecyclerView.RecyclerListener mListener;
+    RecyclerViewClickListener mListener;
 
 
     public RideWindowAdapter(List<RideWindow> rideWindows, RecyclerViewClickListener listener) {
@@ -42,16 +41,15 @@ public class RideWindowAdapter extends RecyclerView.Adapter<RideWindowAdapter.Ri
     public RideWindowViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.fragment_ride_window, parent, false);
-        return new RideWindowViewHolder(view);
+        return new RideWindowViewHolder(view, mListener);
     }
 
     @Override
     public void onBindViewHolder(final RideWindowViewHolder holder, final int position) {
         RideWindow rideWindow = mRideWindows.get(position);
 
-
         DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        SimpleDateFormat formatter = new SimpleDateFormat("hh:mm a");
+        SimpleDateFormat formatter = new SimpleDateFormat("h:mm a");
         Date date;
 
         try {
@@ -62,15 +60,8 @@ public class RideWindowAdapter extends RecyclerView.Adapter<RideWindowAdapter.Ri
 
         }
 
-        holder.button1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                 RideWindow rideWindow1 = mRideWindows.get(position);
+        holder.button1.setClickable(false);
 
-
-
-            }
-        });
     }
 
 
@@ -84,15 +75,23 @@ public class RideWindowAdapter extends RecyclerView.Adapter<RideWindowAdapter.Ri
         return mRideWindows.size();
     }
 
-    public class RideWindowViewHolder extends RecyclerView.ViewHolder {
+    public class RideWindowViewHolder extends RecyclerView.ViewHolder implements  View.OnClickListener{
+
+        private RecyclerViewClickListener mListener;
 
         @BindView(R.id.button1) Button button1;
 
 
-        public RideWindowViewHolder(View view) {
+        public RideWindowViewHolder(View view, RecyclerViewClickListener listener) {
             super(view);
             ButterKnife.bind(this, view);
+            mListener = listener;
+            view.setOnClickListener(this);
+        }
 
+        @Override
+        public void onClick(View view) {
+            mListener.onClick(view, getAdapterPosition());
         }
     }
 }

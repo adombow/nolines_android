@@ -1,6 +1,7 @@
 package com.nolines.nolines;
 
 import android.app.DatePickerDialog;
+import android.app.DialogFragment;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -36,7 +37,7 @@ import butterknife.ButterKnife;
  * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
  * interface.
  */
-public class RideFragment extends Fragment implements Updateable{
+public class RideFragment extends Fragment implements Updateable, RideWindowDialog.RideWindowDialogListener{
     private static final String TAG = "RideFragment";
     private static final String ARG_COLUMN_COUNT = "column-count";
 
@@ -108,11 +109,9 @@ public class RideFragment extends Fragment implements Updateable{
                         calendar.set(Calendar.YEAR, year);
                         calendar.set(Calendar.MONTH, monthOfYear);
                         calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                        String date = DateFormat.getDateInstance(DateFormat.MEDIUM).format(calendar.getTime());
-                        Log.i(TAG,date);
-                        //btn_dialog_7.setText(date);
-                        //
-                        // dateTextView.setText(date);
+                        String date = DateFormat.getDateInstance(DateFormat.FULL).format(calendar.getTime());
+                        mAdapter.setDate(date);
+                        mAdapter.notifyDataSetChanged();
                     }
                 }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
                 datePickerDialog.getDatePicker().setCalendarViewShown(false);
@@ -170,7 +169,7 @@ public class RideFragment extends Fragment implements Updateable{
     }
     @Override
     public void onRidesUpdate(){
-        mAdapter = new RideAdapter(rides.getRideList(),mListener,this.getContext());
+        mAdapter = new RideAdapter(rides.getRideList(),this.getContext(),this,DateFormat.getDateInstance(DateFormat.FULL).format(calendar.getTime()));
         recyclerView.setAdapter(mAdapter);
     }
 
@@ -219,4 +218,10 @@ public class RideFragment extends Fragment implements Updateable{
             }
         });
     }
+
+    @Override
+    public void onDialogPositiveClick(int rideIndex,int windowIndex){
+        Log.v(TAG,"d callback");
+    }
+
 }

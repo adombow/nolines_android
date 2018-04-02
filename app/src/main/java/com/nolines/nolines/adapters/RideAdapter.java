@@ -1,32 +1,31 @@
 package com.nolines.nolines.adapters;
+import android.app.Activity;
 import android.content.Context;
-import android.support.annotation.IntDef;
+import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.nolines.nolines.R;
+import com.nolines.nolines.RideFragment;
 import com.nolines.nolines.RideFragment.OnListFragmentInteractionListener;
+import com.nolines.nolines.RideWindowDialog;
 import com.nolines.nolines.api.models.Ride;
 import com.nolines.nolines.api.models.RideWindow;
 import com.squareup.picasso.Picasso;
 
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import java.util.Calendar;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static com.nolines.nolines.api.models.Ride.AFTERNOON;
-import static com.nolines.nolines.api.models.Ride.EVENING;
 import static com.nolines.nolines.api.models.Ride.MORNING;
 
 /**
@@ -36,17 +35,20 @@ import static com.nolines.nolines.api.models.Ride.MORNING;
 public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder> {
 
     private final List<Ride> mRides;
-    private final OnListFragmentInteractionListener mListener;
+
     private final Context mContext;
+    private final RideFragment mFragment;
     private final RecyclerView.RecycledViewPool viewPool;
+    private String mDate;
 
     @Ride.TimeFrame
     private int timeFrame = MORNING;
 
-    public RideAdapter(List<Ride> rides, OnListFragmentInteractionListener listener, Context context) {
+    public RideAdapter(List<Ride> rides, Context context, RideFragment fragment, String date) {
         mRides = rides;
-        mListener = listener;
         mContext = context;
+        mFragment = fragment;
+        mDate = date;
 
         viewPool = new RecyclerView.RecycledViewPool();
     }
@@ -54,6 +56,7 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder
     public void setTimeFrame(@Ride.TimeFrame int timeFrame){
         this.timeFrame = timeFrame;
     }
+    public void setDate(String date) {this.mDate = date;}
 
     @Override
     public RideViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -66,12 +69,24 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder
 
     @Override
     public void onBindViewHolder(final RideViewHolder holder, final int position) {
-        Picasso.get().load(mRides.get(position).getPhotoURL()).into(holder.rideImage);
-        holder.rideName.setText(mRides.get(position).getName());
-        holder.subtitle.setText(mRides.get(position).getRideType());
-        // holder.rideWaitTime.setText(Integer.toString(mRides.get(position).getWaitTime()));
+        final Ride ride = mRides.get(position);
 
-        holder.rideWindowAdapter = new RideWindowAdapter(mRides.get(position).getRideWindows(timeFrame), mListener);
+        Picasso.get().load(ride.getPhotoURL()).into(holder.rideImage);
+        holder.rideName.setText(ride.getName());
+        holder.subtitle.setText(ride.getRideType());
+        holder.details.setText(mDate);
+
+        RecyclerViewClickListener recyclerViewClickListener = new RecyclerViewClickListener() {
+            @Override
+            public void onClick(View view, int window_position) {
+                //Toast.makeText(mContext, "Position: " + window_position + " " + position, Toast.LENGTH_SHORT).show();
+
+                RideWindowDialog dialog = RideWindowDialog.newInstance(mFragment,ride, ride.getRideWindows(timeFrame).get(window_position), mDate);
+                dialog.show(((Activity) mContext).getFragmentManager() , "NoticeDialogFragment");
+            }
+        };
+
+        holder.rideWindowAdapter = new RideWindowAdapter(ride.getRideWindows(timeFrame), recyclerViewClickListener);
         holder.windowRecyclerView.setRecycledViewPool(viewPool);
         holder.windowRecyclerView.setAdapter(holder.rideWindowAdapter);
 
@@ -107,9 +122,5 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder
             ButterKnife.bind(this,view);
 
         }
-
-
-
-
     }
 }
