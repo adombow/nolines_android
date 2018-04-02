@@ -48,21 +48,12 @@
                 android:value="com.nolines.nolines.MainActivity" />
         </activity>
         <activity
-            android:name=".RideWindowActivity"
-            android:label="PickTicketTimeActivity"
-            android:parentActivityName=".TicketSelectActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.nolines.nolines.TicketSelectActivity" />
-        </activity>
-        <activity
             android:name=".MapsActivity"
             android:label="@string/title_activity_maps">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.nolines.nolines.MainActivity" />
         </activity>
-        ]
         <activity
             android:name=".MapsDrawerActivity"
             android:label="@string/title_activity_maps_drawer"
@@ -81,10 +72,12 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.nolines.nolines.MainActivity" />
         </activity>
-
         <service
             android:name=".api.service.TicketAlarmProcessor"
             android:exported="false"></service>
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/title_activity_settings"></activity>
     </application>
 
 </manifest>

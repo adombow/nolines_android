@@ -87,11 +87,7 @@ public class ViewTicketsActivity extends AppCompatActivity
             drawer.closeDrawer(GravityCompat.START);
         } else if (id == R.id.nav_About) {
 
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
-        }
+        } 
 
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
