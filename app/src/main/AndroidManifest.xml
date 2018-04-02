@@ -29,8 +29,7 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_ar"
             android:screenOrientation="landscape"
-            android:theme="@style/FullscreenTheme"></activity>
-
+            android:theme="@style/FullscreenTheme"/>
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
@@ -74,10 +73,13 @@
         </activity>
         <service
             android:name=".api.service.TicketAlarmProcessor"
-            android:exported="false"></service>
+            android:exported="false"/>
+        <receiver android:name=".api.service.AlarmReceiver"
+            android:enabled="true"
+            android:exported="false"/>
         <activity
             android:name=".SettingsActivity"
-            android:label="@string/title_activity_settings"></activity>
+            android:label="@string/title_activity_settings"/>
     </application>
 
 </manifest>

@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import java.util.Calendar;
+import java.util.Date;
+
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -24,24 +26,25 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.nolines.nolines.api.models.GuestHolder;
+import com.nolines.nolines.api.models.Ticket;
+import com.nolines.nolines.api.service.AlarmReceiver;
 import com.nolines.nolines.api.service.TicketAlarmProcessor;
 
 import com.nolines.nolines.api.models.Ride;
+import com.nolines.nolines.api.service.Updateable;
 import com.nolines.nolines.dummy.DummyContent;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
         implements NavigationView.OnNavigationItemSelectedListener,
         RideFragment.OnListFragmentInteractionListener,
-        HomeFragment.OnListFragmentInteractionListener
-    {
+        HomeFragment.OnListFragmentInteractionListener{
 
     @BindView(R.id.drawer_layout) DrawerLayout drawer;
     @BindView(R.id.nav_view) NavigationView navigationView;
-    @BindView(R.id.fabSendNotification) FloatingActionButton sendNotificationButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +52,6 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         ButterKnife.bind(this);
-        sendNotificationButton.setOnClickListener(this);
 
         navigationView.setNavigationItemSelectedListener(this);
 
@@ -150,33 +152,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onListFragmentInteraction(Ride ride){
-
-    }
+    public void onListFragmentInteraction(Ride ride){}
 
     @Override
-    public void onListFragmentInteraction(DummyContent.DummyItem item){};
-
-    @Override
-    public void onClick(View view){
-        if(view.getId() == sendNotificationButton.getId()){
-            Toast.makeText(this, "FAB clicked", Toast.LENGTH_SHORT).show();
-            TicketAlarmProcessor.startActionCheckTickets(this);
-        }
-    }
-
-    private void beginTicketAlarmService(){
-        //Create background service intent set to run every 20 seconds
-        Intent ticketProcessor = new Intent(this, TicketAlarmProcessor.class);
-        PendingIntent pendingIntent = PendingIntent.getService(this,  0, ticketProcessor, 0);
-
-        AlarmManager alarmManager = (AlarmManager)this.getSystemService(this.ALARM_SERVICE);
-        //For each ticket in guest
-            //if same DATE find difference in time between now and the ticket time
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.add(Calendar.SECOND, 60); // first time
-        long frequency= 20 * 1000; // in ms
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), frequency, pendingIntent);
-    }
+    public void onListFragmentInteraction(DummyContent.DummyItem item){}
 }

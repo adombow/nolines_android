@@ -111,4 +111,17 @@
     <!--    Notification Text   -->
     <string name="channel_name">NOLINES</string>
     <string name="channel_description">Notification Channel for the NoLines app</string>
+    <string name="notification_title_generic">Ride window notification</string>
+    <string name="notification_generic">Your ride window is almost open!</string>
+    <string name="notification_title">%1s ride window notification</string>
+    <plurals name="pre_window_open">
+        <item quantity="one">Your ride window opens in %1$d minute!</item>
+        <item quantity="many">Your ride window opens in %1$d minutes!</item>
+    </plurals>
+    <string name="window_open">Your ride window is now open!</string>
+    <plurals name="pre_window_close">
+        <item quantity="one">Your ride window closes in %1$d minute!</item>
+        <item quantity="many">Your ride window closes in %1$d minutes!</item>
+    </plurals>
+    <string name="window_close">Your ride window is now closed!</string>
 </resources>

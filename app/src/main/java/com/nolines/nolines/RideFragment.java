@@ -215,4 +215,9 @@ public class RideFragment extends Fragment implements Updateable{
             }
         });
     }
+
+    @Override
+    public void onGuestUpdate(){
+
+    }
 }

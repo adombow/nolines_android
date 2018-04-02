@@ -6,6 +6,8 @@ import com.nolines.nolines.api.service.Updateable;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -16,6 +18,7 @@ import java.util.List;
  Singleton class for a Global ticket list
  */
 public class GuestHolder {
+    private static final String TAG = "GuestHolder";
 
     private List<Updateable> listeners = new ArrayList<Updateable>();
 
@@ -36,7 +39,7 @@ public class GuestHolder {
     public void refreshGuest() { getGuest(); }
 
     private void getGuest(){
-
+        this.guest = new Guest("Andrew");
     }
 
     public void registerListener(Updateable listener){
