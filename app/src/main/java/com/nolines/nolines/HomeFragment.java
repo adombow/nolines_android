@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import com.nolines.nolines.adapters.HomeCardAdapter;
 import com.nolines.nolines.dummy.DummyContent;
 import com.nolines.nolines.dummy.DummyContent.DummyItem;
+import com.nolines.nolines.viewmodels.ServiceTestCard;
 import com.nolines.nolines.viewmodels.WelcomeCard;
 
 import java.util.ArrayList;
@@ -76,6 +77,7 @@ public class HomeFragment extends Fragment {
         List<Object> list= new ArrayList<>();
         list.add(new WelcomeCard("Timothy"));
         list.add(new WelcomeCard("John"));
+        list.add(new ServiceTestCard("Notification Service Test", "Send Notification"));
 
         recyclerView.setAdapter(new HomeCardAdapter(list, mListener));
         return view;

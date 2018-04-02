@@ -36,7 +36,7 @@ public class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position) {
-        holder.rideName.setText(mTickets.get(position).getRideName());
+        holder.rideName.setText(mTickets.get(position).getRide().getName());
         holder.startTime.setText(mTickets.get(position).getStartTime());
         holder.end_time.setText(mTickets.get(position).getEndTime());
 
