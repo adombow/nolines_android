@@ -111,10 +111,10 @@ public class TicketFragment extends Fragment {
 
     private void populateTicketList(){
         tickets = new ArrayList<>();
-        tickets.add(new Ticket("9:00", "9:30", "Coaster", 49.242128, -123.174116, 4, ""));
-        tickets.add(new Ticket("11:00", "11:30", "Ferris Wheel", 49.242128, -123.174116, 4, ""));
-        tickets.add(new Ticket("14:00", "14:30", "Log Flume", 49.242128, -123.174116, 4, ""));
-        tickets.add(new Ticket("10:00", "10:30", "Merry-Go-Round", 49.242128, -123.174116, 4, ""));
+        //tickets.add(new Ticket("9:00", "9:30", "Coaster", 49.242128, -123.174116, 4, ""));
+        //tickets.add(new Ticket("11:00", "11:30", "Ferris Wheel", 49.242128, -123.174116, 4, ""));
+        //tickets.add(new Ticket("14:00", "14:30", "Log Flume", 49.242128, -123.174116, 4, ""));
+        //tickets.add(new Ticket("10:00", "10:30", "Merry-Go-Round", 49.242128, -123.174116, 4, ""));
 
     }
 }
