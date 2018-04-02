@@ -1,8 +1,6 @@
 package com.nolines.nolines;
 
 import android.Manifest;
-import android.app.Activity;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
@@ -83,7 +81,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     SupportMapFragment mapFrag;
     LocationRequest mLocationRequest;
     Location mLastLocation;
-    Marker mCurrLocationMarker;
+    Marker mLastLocationMarker;
     FusedLocationProviderClient mFusedLocationClient;
 
     Marker mChildLocationMarker;
@@ -220,9 +218,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     
     @Override
     public void onMapClick(LatLng point){
-        if (mCurrLocationMarker != null) {
+        if (mLastLocationMarker != null) {
             currentDirections.remove();
-            mCurrLocationMarker.remove();
+            mLastLocationMarker.remove();
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()), 14));
             findDirectionsBtn.hide();
         }
@@ -230,8 +228,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public boolean onMarkerClick(Marker marker){
-        if (mCurrLocationMarker != null) {
-            mCurrLocationMarker.remove();
+        if (mLastLocationMarker != null) {
+            mLastLocationMarker.remove();
         }
         if(marker.equals(lastSelectedMarker)){
             return true;
@@ -339,7 +337,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         markerOptions.position(latLng);
         markerOptions.title("Current Position");
         markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-        mCurrLocationMarker = mMap.addMarker(markerOptions);
+        mLastLocationMarker = mMap.addMarker(markerOptions);
 
         //ApplicationInfo app = this.getPackageManager().getApplicationInfo("com.nolines.nolines", PackageManager.GET_META_DATA );
         //Bundle bundle = app.metaData;
@@ -381,15 +379,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.dirFab) {
-            if(mCurrLocationMarker != null)
-                mCurrLocationMarker.remove();
+            if(mLastLocationMarker != null)
+                mLastLocationMarker.remove();
             LatLng latLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
             MarkerOptions markerOptions = new MarkerOptions();
             markerOptions.position(latLng);
             markerOptions.title("Your location");
             markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-            mCurrLocationMarker = mMap.addMarker(markerOptions);
-            displayRoute(mCurrLocationMarker.getPosition(), lastSelectedMarker.getPosition());
+            mLastLocationMarker = mMap.addMarker(markerOptions);
+            displayRoute(mLastLocationMarker.getPosition(), lastSelectedMarker.getPosition());
         }
     }
 
@@ -429,7 +427,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             markerInfo.setText("");
             for(Ride ride : rides.getRideList()){
                 if(marker.getTitle().equals(ride.getName())) {
-                    Picasso.get().load(ride.getPhotoURL()).into(markerPic);
+                    //Picasso.get().load(ride.getPhotoURL()).into(markerPic);
+                    Picasso.get()
+                            .load("http://i.imgur.com/r6EAcbN.jpg")
+                            .placeholder(R.drawable.logo)
+                            .resize(200, 200)
+                            .centerCrop()
+                            .into(markerPic);
 
                     if( !ride.getName().equals("") ){
                         SpannableString titleText = new SpannableString(ride.getName());

@@ -1,11 +1,12 @@
 package com.nolines.nolines;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import java.util.Calendar;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -14,16 +15,24 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
+
+import com.nolines.nolines.api.service.TicketAlarmProcessor;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
-    DrawerLayout drawer;
-    private ImageView mImageView;
+public class MainActivity extends AppCompatActivity
+        implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
+
+    @BindView(R.id.fabSendNotification) FloatingActionButton sendNotificationButton;
+    @BindView(R.id.drawer_layout) DrawerLayout drawer;
+    @BindView(R.id.imageView2) ImageView mImageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,7 +41,8 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ButterKnife.bind(this);
+
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
@@ -41,20 +51,20 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        mImageView = findViewById(R.id.imageView2);
         try {
             // get input stream
             InputStream ims = getAssets().open("logo.png");
             // load image as Drawable
             Drawable d = Drawable.createFromStream(ims, null);
             // set image to ImageView
-
             mImageView.setImageDrawable(d);
             ims.close();
         }
         catch(IOException ex) {
         }
 
+        //beginTicketAlarmService();
+        sendNotificationButton.setOnClickListener(this);
     }
 
     @Override
@@ -119,5 +129,28 @@ public class MainActivity extends AppCompatActivity
             drawer.closeDrawer(GravityCompat.START);
         }
         return true;
+    }
+
+    @Override
+    public void onClick(View view){
+        if(view.getId() == sendNotificationButton.getId()){
+            Toast.makeText(this, "FAB clicked", Toast.LENGTH_SHORT).show();
+            TicketAlarmProcessor.startActionCheckTickets(this);
+        }
+    }
+
+    private void beginTicketAlarmService(){
+        //Create background service intent set to run every 20 seconds
+        Intent ticketProcessor = new Intent(this, TicketAlarmProcessor.class);
+        PendingIntent pendingIntent = PendingIntent.getService(this,  0, ticketProcessor, 0);
+
+        AlarmManager alarmManager = (AlarmManager)this.getSystemService(this.ALARM_SERVICE);
+        //For each ticket in guest
+            //if same DATE find difference in time between now and the ticket time
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.add(Calendar.SECOND, 60); // first time
+        long frequency= 20 * 1000; // in ms
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), frequency, pendingIntent);
     }
 }

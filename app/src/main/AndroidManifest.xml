@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
         android:allowBackup="true"
@@ -28,8 +29,7 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_ar"
             android:screenOrientation="landscape"
-            android:theme="@style/FullscreenTheme">
-        </activity>
+            android:theme="@style/FullscreenTheme"></activity>
 
         <meta-data
             android:name="com.google.android.gms.version"
@@ -61,7 +61,8 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.nolines.nolines.MainActivity" />
-        </activity>]
+        </activity>
+        ]
         <activity
             android:name=".MapsDrawerActivity"
             android:label="@string/title_activity_maps_drawer"
@@ -80,6 +81,10 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.nolines.nolines.MainActivity" />
         </activity>
+
+        <service
+            android:name=".api.service.TicketAlarmProcessor"
+            android:exported="false"></service>
     </application>
 
 </manifest>

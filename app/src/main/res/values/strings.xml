@@ -32,4 +32,7 @@
     <string name="location_permission_denied">This app requires location permission to enable the park map and ticket alerts.\n Please try again and grant access to use the location.</string>
     <string name="permission_required_toast">Location permission is required for this app\\'s map view.</string>
 
+    <!--    Notification Text   -->
+    <string name="channel_name">NOLINES</string>
+    <string name="channel_description">Notification Channel for the NoLines app</string>
 </resources>
