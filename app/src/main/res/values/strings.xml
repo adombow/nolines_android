@@ -6,20 +6,106 @@
 
     <string name="action_settings">Settings</string>
 
-    <string name="title_activity_ar">ARActivity</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
-    <string name="title_activity_map_">Map_Activity</string>
 
+    <!-- Drawer Entries -->
+    <string name="drawer_home">Home</string>
     <string name="drawer_map">Map View</string>
-    <string name="drawer_ride_view">View Rides</string>
+    <string name="drawer_ticket_select">Make a Reservation</string>
     <string name="drawer_AR">ARActivity</string>
-    <string name="drawer_about">About</string>
-    <string name="drawer_tickets">View Tickets</string>
+    <string name="settings">Settings</string>
+    <string name="view_tickets">View Tickets</string>
 
-    <string name="title_activity_ticket_select">TicketSelectActivity</string>
-    <string name="title_activity_pick_ticket_time">PickTicketTimeActivity</string>
+    <string name="wait_time">Wait Time: </string>
+
+    <!-- Activities -->
+    <string name="title_activity_ar">ARActivity</string>
+    <string name="title_activity_ticket_select">NoLines Reservations</string>
     <string name="title_activity_maps">Map</string>
+    <string name="title_activity_map_">Map_Activity</string>
     <string name="title_activity_maps_drawer">MapsDrawerActivity</string>
+    <string name="title_activity_view_tickets">ViewTicketsActivity</string>
+
+    <!--    Permissions    -->
+    <string name="permission_rationale_location">Access to the location service is required to view the park map.</string>
+    <string name="location_permission_denied">This app requires location permission to enable the park map and ticket alerts.\n Please try again and grant access to use the location.</string>
+    <string name="permission_required_toast">Location permission is required for this app\\'s map view.</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Strings related to Settings -->
+
+    <!-- Example General settings -->
+    <string name="pref_header_general">General</string>
+
+    <string name="pref_title_social_recommendations">Enable social recommendations</string>
+    <string name="pref_description_social_recommendations">Recommendations for people to contact
+        based on your message history
+    </string>
+
+    <string name="pref_title_display_name">Display name</string>
+    <string name="pref_default_display_name">John Smith</string>
+
+    <string name="pref_title_add_friends_to_messages">Add friends to messages</string>
+    <string-array name="pref_example_list_titles">
+        <item>Always</item>
+        <item>When possible</item>
+        <item>Never</item>
+    </string-array>
+    <string-array name="pref_example_list_values">
+        <item>1</item>
+        <item>0</item>
+        <item>-1</item>
+    </string-array>
+
+    <!-- Example settings for Data & Sync -->
+    <string name="pref_header_data_sync">Data &amp; sync</string>
+
+    <string name="pref_title_sync_frequency">Sync frequency</string>
+    <string-array name="pref_sync_frequency_titles">
+        <item>15 minutes</item>
+        <item>30 minutes</item>
+        <item>1 hour</item>
+        <item>3 hours</item>
+        <item>6 hours</item>
+        <item>Never</item>
+    </string-array>
+    <string-array name="pref_sync_frequency_values">
+        <item>15</item>
+        <item>30</item>
+        <item>60</item>
+        <item>180</item>
+        <item>360</item>
+        <item>-1</item>
+    </string-array>
+
+    <string-array name="list_preference_entries">
+        <item>Entry 1</item>
+        <item>Entry 2</item>
+        <item>Entry 3</item>
+    </string-array>
+
+    <string-array name="list_preference_entry_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+
+    <string-array name="multi_select_list_preference_default_value" />
+
+    <string name="pref_title_system_sync_settings">System sync settings</string>
+
+    <!-- Example settings for Notifications -->
+    <string name="pref_header_notifications">Notifications</string>
+
+    <string name="pref_title_new_message_notifications">New message notifications</string>
+
+    <string name="pref_title_ringtone">Ringtone</string>
+    <string name="pref_ringtone_silent">Silent</string>
+
+    <string name="pref_title_vibrate">Vibrate</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>
