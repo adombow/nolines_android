@@ -1,20 +1,39 @@
 package com.nolines.nolines;
 
+import android.app.DatePickerDialog;
 import android.content.Context;
 import android.os.Bundle;
-import android.app.Fragment;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.DatePicker;
+import android.widget.TextView;
 
 import com.nolines.nolines.adapters.TicketAdapter;
+import com.nolines.nolines.api.models.GuestHolder;
 import com.nolines.nolines.api.models.Ticket;
+import com.nolines.nolines.api.service.Updateable;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 /**
  * A fragment representing a list of Items.
@@ -22,13 +41,20 @@ import java.util.List;
  * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
  * interface.
  */
-public class TicketFragment extends Fragment {
-
-    private List<Ticket> tickets;
-
+public class TicketFragment extends Fragment implements Updateable{
+    private static final String TAG = "TicketFragment";
     private static final String ARG_COLUMN_COUNT = "column-count";
-    private int mColumnCount = 1;
+
     private OnListFragmentInteractionListener mListener;
+
+    private TicketAdapter mAdapter;
+    private GuestHolder mGuest;
+
+    private Calendar calendar;
+
+    @BindView(R.id.recyclerView) RecyclerView recyclerView;
+    @BindView(R.id.toolbar) Toolbar toolbar;
+    @BindView(R.id.empty_recyclerview) TextView emptyRecycler;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -51,11 +77,9 @@ public class TicketFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (getArguments() != null) {
-            mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
-        }
+        calendar = Calendar.getInstance();
 
-        populateTicketList();
+        getGuest();
     }
 
     @Override
@@ -63,20 +87,45 @@ public class TicketFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_ticket_list, container, false);
 
-        // Set the adapter
-        if (view instanceof RecyclerView) {
-            Context context = view.getContext();
-            RecyclerView recyclerView = (RecyclerView) view;
-            if (mColumnCount <= 1) {
-                recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            } else {
-                recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
-            }
-            recyclerView.setAdapter(new TicketAdapter(tickets, mListener));
-        }
+        ButterKnife.bind(this, view);
+
+        setupToolbar();
+        setHasOptionsMenu(true);
+
         return view;
     }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.ride, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.date:
+                DatePickerDialog datePickerDialog = new DatePickerDialog(getContext(), new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                        calendar.set(Calendar.YEAR, year);
+                        calendar.set(Calendar.MONTH, monthOfYear);
+                        calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                        String date = DateFormat.getDateInstance(DateFormat.MEDIUM).format(calendar.getTime());
+                        Log.i(TAG,date);
+                        //btn_dialog_7.setText(date);
+                        //
+                        // dateTextView.setText(date);
+                    }
+                }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
+                datePickerDialog.getDatePicker().setCalendarViewShown(false);
+                datePickerDialog.show();
+                break;
+        }
+        if(mGuest != null)
+            setupAdapter();
+        return super.onOptionsItemSelected(item);
+    }
 
     @Override
     public void onAttach(Context context) {
@@ -95,6 +144,12 @@ public class TicketFragment extends Fragment {
         mListener = null;
     }
 
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        mGuest.unregisterListener(this);
+    }
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -109,12 +164,58 @@ public class TicketFragment extends Fragment {
         void onListFragmentInteraction(Ticket ticket);
     }
 
-    private void populateTicketList(){
-        tickets = new ArrayList<>();
-        //tickets.add(new Ticket("9:00", "9:30", "Coaster", 49.242128, -123.174116, 4, ""));
-        //tickets.add(new Ticket("11:00", "11:30", "Ferris Wheel", 49.242128, -123.174116, 4, ""));
-        //tickets.add(new Ticket("14:00", "14:30", "Log Flume", 49.242128, -123.174116, 4, ""));
-        //tickets.add(new Ticket("10:00", "10:30", "Merry-Go-Round", 49.242128, -123.174116, 4, ""));
+    private void getGuest() {
+        mGuest = GuestHolder.getInstance(this.getActivity());
+        mGuest.registerListener(this);
+        mGuest.refreshGuest();
+    }
 
+    @Override
+    public void onRidesUpdate(){
+    }
+
+    @Override
+    public void onGuestUpdate(){
+        if(mGuest.getGuestObject().getTickets().isEmpty()){
+            recyclerView.setVisibility(View.GONE);
+            emptyRecycler.setVisibility(View.VISIBLE);
+        } else{
+            recyclerView.setVisibility(View.VISIBLE);
+            emptyRecycler.setVisibility(View.GONE);
+            mAdapter = new TicketAdapter(mGuest.getGuestObject().getTickets(), mListener, this.getContext());
+            recyclerView.setAdapter(mAdapter);
+        }
+    }
+
+    private void setupToolbar(){
+        toolbar.setTitle("Tickets");
+        ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
+        ((MainActivity) getActivity()).setupActionBarDrawerToggle(toolbar);
+        ((MainActivity) getActivity()).getSupportActionBar().setDisplayShowTitleEnabled(true);
+    }
+
+    private void setupAdapter(){
+        List<Ticket> datedTickets = new ArrayList<Ticket>();
+
+        for(Ticket ticket : mGuest.getGuestObject().getTickets()){
+            //Look through all of the guest's tickets and check if they have any for the selected day
+            if (ticket.getTime() != null) {
+                Calendar ticketDate = ticket.getLocalDatetimeFromTime();
+                if (ticketDate.get(Calendar.YEAR) == calendar.get(Calendar.YEAR) &&
+                        ticketDate.get(Calendar.MONTH) == calendar.get(Calendar.MONTH) &&
+                        ticketDate.get(Calendar.DATE) == calendar.get(Calendar.DATE)) {
+                    datedTickets.add(ticket);
+                }
+            }
+        }
+        if(datedTickets.isEmpty()){
+            recyclerView.setVisibility(View.GONE);
+            emptyRecycler.setVisibility(View.VISIBLE);
+        } else{
+            recyclerView.setVisibility(View.VISIBLE);
+            emptyRecycler.setVisibility(View.GONE);
+            mAdapter = new TicketAdapter(datedTickets, mListener, this.getContext());
+            recyclerView.setAdapter(mAdapter);
+        }
     }
 }

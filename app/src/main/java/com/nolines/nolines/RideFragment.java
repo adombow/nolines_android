@@ -41,7 +41,7 @@ public class RideFragment extends Fragment implements Updateable, RideWindowDial
     private static final String TAG = "RideFragment";
     private static final String ARG_COLUMN_COUNT = "column-count";
 
-    private  OnListFragmentInteractionListener mListener;
+    private OnListFragmentInteractionListener mListener;
 
     private RideAdapter mAdapter;
     private RidesHolder rides;
@@ -79,7 +79,7 @@ public class RideFragment extends Fragment implements Updateable, RideWindowDial
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_ride_list, container, false);
 
-        ButterKnife.bind(this,view);
+        ButterKnife.bind(this, view);
 
         setupToolbar();
         setupTabs();
@@ -161,9 +161,8 @@ public class RideFragment extends Fragment implements Updateable, RideWindowDial
         rides = RidesHolder.getInstance(this.getActivity());
         rides.registerListener(this);
         rides.refreshRides();
-
-
     }
+
     @Override
     public void onRidesUpdate(){
         if(mAdapter == null){

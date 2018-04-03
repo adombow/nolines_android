@@ -2,6 +2,8 @@ package com.nolines.nolines.adapters;
 import android.app.Activity;
 import android.content.Context;
 import android.support.v4.app.Fragment;
+
+import android.support.annotation.IntDef;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -67,7 +69,6 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder
     public RideViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.fragment_ride, parent, false);
-
 
         return new RideViewHolder(view);
     }
@@ -149,7 +150,6 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder
         public RideViewHolder(View view) {
             super(view);
             ButterKnife.bind(this,view);
-
         }
     }
 }

@@ -10,9 +10,12 @@ public class AlarmReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent){
         Bundle extras = intent.getExtras();
         if(extras == null){
-            TicketAlarmProcessor.startActionCheckTickets(context, -1);
+            TicketAlarmProcessor.startActionCheckTickets(context,
+                    -1, TicketAlarmProcessor.NotificationType.CLOSE);
         }else{
-            TicketAlarmProcessor.startActionCheckTickets(context, extras.getInt(TicketAlarmProcessor.NOTIFICATION_TICKET_ID));
+            TicketAlarmProcessor.startActionCheckTickets(context,
+                    extras.getInt(TicketAlarmProcessor.NOTIFICATION_TICKET_ID),
+                    (TicketAlarmProcessor.NotificationType) extras.getSerializable(TicketAlarmProcessor.NOTIFICATION_TYPE));
         }
     }
 }

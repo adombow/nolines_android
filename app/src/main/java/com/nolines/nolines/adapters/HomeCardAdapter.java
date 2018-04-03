@@ -100,12 +100,12 @@ public class HomeCardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 vh3.button.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Toast.makeText(v.getContext(), "Notification set!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(v.getContext(), "Notification sent!", Toast.LENGTH_SHORT).show();
 
-                        GuestHolder guest = GuestHolder.getInstance(v.getContext());
-                        TicketAlarmProcessor.setNotificationsForTicket(guest.getGuestObject().getTickets().get(0), v.getContext());
+                        //GuestHolder guest = GuestHolder.getInstance(v.getContext());
+                        //TicketAlarmProcessor.setNotificationsForTicket(guest.getGuestObject().getTickets().get(0), v.getContext());
 
-                        //TicketAlarmProcessor.startActionCheckTickets(v.getContext());
+                        TicketAlarmProcessor.startActionCheckTickets(v.getContext(), -1, TicketAlarmProcessor.NotificationType.CLOSE);
                     }
                 });
             default:

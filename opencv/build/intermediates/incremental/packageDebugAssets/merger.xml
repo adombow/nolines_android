@@ -1,2 +1,2 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merger version="3"><dataSet config="main"><source path="C:\Users\timot\AndroidStudioProjects\NoLines\opencv\src\main\assets"/><source path="C:\Users\timot\AndroidStudioProjects\NoLines\opencv\build\generated\assets\shaders\debug"/></dataSet><dataSet config="debug"><source path="C:\Users\timot\AndroidStudioProjects\NoLines\opencv\src\debug\assets"/></dataSet></merger>
+<merger version="3"><dataSet config="main"><source path="F:\UBC\CPEN_391_Repo\nolines_android\opencv\src\main\assets"/><source path="F:\UBC\CPEN_391_Repo\nolines_android\opencv\build\generated\assets\shaders\debug"/></dataSet><dataSet config="debug"><source path="F:\UBC\CPEN_391_Repo\nolines_android\opencv\src\debug\assets"/></dataSet></merger>

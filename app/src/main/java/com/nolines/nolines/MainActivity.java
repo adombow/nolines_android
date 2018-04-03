@@ -1,19 +1,10 @@
 package com.nolines.nolines;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import java.util.Calendar;
-import java.util.Date;
-
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -22,17 +13,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.Toast;
 
-import com.nolines.nolines.api.models.GuestHolder;
-import com.nolines.nolines.api.models.Ticket;
-import com.nolines.nolines.api.service.AlarmReceiver;
-import com.nolines.nolines.api.service.TicketAlarmProcessor;
-
+import com.nolines.nolines.api.models.Guest;
 import com.nolines.nolines.api.models.Ride;
-import com.nolines.nolines.api.service.Updateable;
+import com.nolines.nolines.api.models.Ticket;
 import com.nolines.nolines.dummy.DummyContent;
 
 import butterknife.BindView;
@@ -41,7 +25,11 @@ import butterknife.ButterKnife;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         RideFragment.OnListFragmentInteractionListener,
-        HomeFragment.OnListFragmentInteractionListener{
+        HomeFragment.OnListFragmentInteractionListener,
+        TicketFragment.OnListFragmentInteractionListener,
+        MapsFragment.OnFragmentInteractionListener{
+
+    public static final String RIDE_ID_ARGUMENT = "com.nolines.nolines.RIDE_ID_ARGUMENT";
 
     @BindView(R.id.drawer_layout) DrawerLayout drawer;
     @BindView(R.id.nav_view) NavigationView navigationView;
@@ -120,9 +108,7 @@ public class MainActivity extends AppCompatActivity
             Intent intent = new Intent(this, ARActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_Map) {
-            //Intent intent = new Intent(this, MapsDrawerActivity.class);
-            Intent intent = new Intent(this, MapsActivity.class);
-            startActivity(intent);
+            fragmentClass = MapsFragment.class;
         } else if (id == R.id.nav_Rides) {
             fragmentClass = RideFragment.class;
         } else if (id == R.id.nav_Tickets){
@@ -156,4 +142,26 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onListFragmentInteraction(DummyContent.DummyItem item){}
+
+    @Override
+    public void onListFragmentInteraction(Ticket ticket){
+        //TODO: Open map view with this ticket selected
+        Fragment fragment = null;
+        try {
+            fragment = (Fragment) MapsFragment.class.newInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if(fragment != null){
+            Bundle args = new Bundle();
+            args.putInt(RIDE_ID_ARGUMENT, ticket.getId());
+            fragment.setArguments(args);
+            getSupportFragmentManager().beginTransaction().
+                    replace(R.id.fragment_container, fragment).
+                    addToBackStack(null).commit();
+        }
+    }
+
+    @Override
+    public void onFragmentInteraction(Uri uri){}
 }

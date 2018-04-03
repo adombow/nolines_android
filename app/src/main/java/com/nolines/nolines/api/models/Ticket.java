@@ -1,42 +1,69 @@
 package com.nolines.nolines.api.models;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
+
 /**
  * Created by timot on 3/14/2018.
  */
 
 public class Ticket {
 
-    private String startTime; //dow mon dd hh:mm:ss tzn yyyy i.e. date.tostring()
-    private String endTime; //dow mon dd hh:mm:ss tzn yyyy
-
-    private int notificationsLeft;
+    private int id;
+    private String time;
     private Ride ride;
 
-    public Ticket(String start_time, String end_time, Ride ride) {
-        this.startTime = start_time;
-        this.endTime = end_time;
+    public static final String dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+
+    public Ticket(String time, Ride ride) {
+        this.time = time;
         this.ride = ride;
-        this.notificationsLeft = 4;
     }
 
+    public int getId() { return id; }
 
-    public String getStartTime() {
-        return startTime;
-    }
-
-    public String getEndTime() {
-        return endTime;
-    }
+    public String getTime() { return time; }
 
     public Ride getRide() {
         return ride;
     }
 
-    public int getNotificationsLeft() {
-        return notificationsLeft;
+    public Calendar getLocalDatetimeFromTime(){
+        DateFormat df = new SimpleDateFormat(Ticket.dateFormat);
+        df.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        Calendar cal = Calendar.getInstance();
+
+        try{
+            Date date = df.parse(this.time);
+            df.setTimeZone(TimeZone.getDefault());
+            cal.setTime(df.parse(df.format(date)));
+        } catch (ParseException e) {
+        }
+        return cal;
     }
 
-    public void reduceNotificationsLeft() {
-        this.notificationsLeft--;
+    /**
+     * Converts the UTC time string in this ticket to a string containing only the time portion
+     * (none of the date) converted to local time and in the format timeFormat
+     * @return The time portion of the UTC time string from this ticket in local time
+     */
+    public String getLocalTimeStringFromTime(String timeFormat){
+        DateFormat df = new SimpleDateFormat(Ticket.dateFormat);
+        df.setTimeZone(TimeZone.getTimeZone("UTC"));
+        SimpleDateFormat formatter = new SimpleDateFormat(timeFormat);
+        formatter.setTimeZone(TimeZone.getDefault());
+
+        String time;
+        try{
+            time = formatter.format(df.parse(this.time));
+        } catch (ParseException e) {
+            time = "";
+        }
+        return time;
     }
 }
