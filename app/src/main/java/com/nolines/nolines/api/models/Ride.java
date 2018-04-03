@@ -1,11 +1,13 @@
 package com.nolines.nolines.api.models;
 
 import android.support.annotation.IntDef;
+import android.view.Window;
 
 import com.google.gson.annotations.SerializedName;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -84,12 +86,20 @@ public class Ride {
 
         switch (timeframe){
             case MORNING:
+                if(morningWindows == null)
+                    morningWindows = new ArrayList<>();
                 return morningWindows;
             case AFTERNOON:
+                if(afternoonWindows == null)
+                    afternoonWindows = new ArrayList<>();
                 return afternoonWindows;
             case EVENING:
+                if(eveningWindows == null)
+                    eveningWindows = new ArrayList<>();
                 return eveningWindows;
             default:
+                if(morningWindows == null)
+                    morningWindows = new ArrayList<>();
                 return morningWindows;
         }
     }

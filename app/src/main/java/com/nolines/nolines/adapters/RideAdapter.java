@@ -113,14 +113,16 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder
             }
         };
 
-        holder.rideWindowAdapter = new RideWindowAdapter(ride.getRideWindows(timeFrame), recyclerViewClickListener);
-        holder.windowRecyclerView.setRecycledViewPool(viewPool);
-        holder.windowRecyclerView.setAdapter(holder.rideWindowAdapter);
+        if(ride.getRideWindows(timeFrame) != null){
+            holder.rideWindowAdapter = new RideWindowAdapter(ride.getRideWindows(timeFrame), recyclerViewClickListener);
+            holder.windowRecyclerView.setRecycledViewPool(viewPool);
+            holder.windowRecyclerView.setAdapter(holder.rideWindowAdapter);
 
-        LinearLayoutManager mLayoutManager = new LinearLayoutManager(mContext);
-        mLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+            LinearLayoutManager mLayoutManager = new LinearLayoutManager(mContext);
+            mLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
 
-        holder.windowRecyclerView.setLayoutManager(mLayoutManager);
+            holder.windowRecyclerView.setLayoutManager(mLayoutManager);
+        }
     }
 
     @Override
