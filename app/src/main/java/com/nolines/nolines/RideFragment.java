@@ -228,5 +228,4 @@ public class RideFragment extends Fragment implements Updateable, RideWindowDial
     public void onDialogPositiveClick(int rideIndex,int windowIndex){
         Log.v(TAG,"d callback");
     }
-
 }
