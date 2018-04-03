@@ -224,4 +224,9 @@ public class RideFragment extends Fragment implements Updateable, RideWindowDial
         Log.v(TAG,"d callback");
     }
 
+
+    @Override
+    public void onGuestUpdate(){
+
+    }
 }

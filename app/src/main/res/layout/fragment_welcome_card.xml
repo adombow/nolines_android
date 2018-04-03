@@ -36,7 +36,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:text="NoLines Reservations Avaliable"
+                    android:text="NoLines Reservations Available"
                     android:textColor="#000"
                     android:textSize="18sp"
                     android:id="@+id/title"
@@ -51,6 +51,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
                 <Button
+                    android:id="@+id/welcome_card_button"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Start Now" />

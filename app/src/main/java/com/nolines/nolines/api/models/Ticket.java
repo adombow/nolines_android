@@ -6,23 +6,17 @@ package com.nolines.nolines.api.models;
 
 public class Ticket {
 
-    private String startTime;
-    private String endTime;
-    private String rideName;
-    private Double lat;
-    private Double lon;
-    private int alertsLeft;
-    private String alertsMessage;
+    private String startTime; //dow mon dd hh:mm:ss tzn yyyy i.e. date.tostring()
+    private String endTime; //dow mon dd hh:mm:ss tzn yyyy
+
+    private int notificationsLeft;
     private Ride ride;
 
-    public Ticket(String start_time, String end_time, String ride_name, Double lat, Double lon, int alerts_left, String alert_message) {
+    public Ticket(String start_time, String end_time, Ride ride) {
         this.startTime = start_time;
         this.endTime = end_time;
-        this.rideName = ride_name;
-        this.lat = lat;
-        this.lon = lon;
-        this.alertsLeft = alerts_left;
-        this.alertsMessage = alert_message;
+        this.ride = ride;
+        this.notificationsLeft = 4;
     }
 
 
@@ -34,23 +28,15 @@ public class Ticket {
         return endTime;
     }
 
-    public String getRideName() {
-        return rideName;
+    public Ride getRide() {
+        return ride;
     }
 
-    public Double getLat() {
-        return lat;
+    public int getNotificationsLeft() {
+        return notificationsLeft;
     }
 
-    public Double getLon() {
-        return lon;
-    }
-
-    public int getAlertsLeft() {
-        return alertsLeft;
-    }
-
-    public String getAlertsMessage() {
-        return alertsMessage;
+    public void reduceNotificationsLeft() {
+        this.notificationsLeft--;
     }
 }
