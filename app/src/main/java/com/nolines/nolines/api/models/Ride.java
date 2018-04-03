@@ -26,6 +26,9 @@ public class Ride {
     @SerializedName("picture_url")
     private String photoURL;
 
+    @SerializedName("window_date")
+    private String windowDate;
+
     @SerializedName("morning_windows")
     private List<RideWindow> morningWindows;
     @SerializedName("afternoon_windows")
@@ -40,7 +43,6 @@ public class Ride {
     @IntDef({MORNING, AFTERNOON, EVENING})
     @Retention(RetentionPolicy.SOURCE)
     public @interface TimeFrame {}
-
 
     public String getName() {
         return name;
@@ -72,6 +74,10 @@ public class Ride {
 
     public int getId() {
         return id;
+    }
+
+    public String getWindowDate() {
+        return windowDate;
     }
 
     public List<RideWindow> getRideWindows(@TimeFrame int timeframe) {

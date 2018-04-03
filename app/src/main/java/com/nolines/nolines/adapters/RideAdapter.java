@@ -20,8 +20,12 @@ import com.nolines.nolines.api.models.RideWindow;
 import com.squareup.picasso.Picasso;
 
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -34,29 +38,30 @@ import static com.nolines.nolines.api.models.Ride.MORNING;
  */
 public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder> {
 
-    private final List<Ride> mRides;
+    private List<Ride> mRides;
 
     private final Context mContext;
     private final RideFragment mFragment;
     private final RecyclerView.RecycledViewPool viewPool;
-    private String mDate;
 
     @Ride.TimeFrame
     private int timeFrame = MORNING;
 
-    public RideAdapter(List<Ride> rides, Context context, RideFragment fragment, String date) {
+    public RideAdapter(List<Ride> rides, Context context, RideFragment fragment) {
         mRides = rides;
         mContext = context;
         mFragment = fragment;
-        mDate = date;
-
         viewPool = new RecyclerView.RecycledViewPool();
+    }
+
+    public void updateRideList(List<Ride> rides){
+        mRides = rides;
+        notifyDataSetChanged();
     }
 
     public void setTimeFrame(@Ride.TimeFrame int timeFrame){
         this.timeFrame = timeFrame;
     }
-    public void setDate(String date) {this.mDate = date;}
 
     @Override
     public RideViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -69,19 +74,41 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder
 
     @Override
     public void onBindViewHolder(final RideViewHolder holder, final int position) {
-        final Ride ride = mRides.get(position);
+        Ride ride = mRides.get(position);
 
         Picasso.get().load(ride.getPhotoURL()).into(holder.rideImage);
         holder.rideName.setText(ride.getName());
         holder.subtitle.setText(ride.getRideType());
-        holder.details.setText(mDate);
+
+
+        // Set Ride details as window_date from request
+        DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        df1.setTimeZone(TimeZone.getTimeZone("UTC"));
+        Date date;
+        String formattedDate = "";
+        try {
+            date = df1.parse(ride.getWindowDate());
+            formattedDate = DateFormat.getDateInstance(DateFormat.FULL).format(date.getTime());
+        }
+        catch(Exception e){}
+        holder.details.setText(formattedDate);
 
         RecyclerViewClickListener recyclerViewClickListener = new RecyclerViewClickListener() {
             @Override
             public void onClick(View view, int window_position) {
                 //Toast.makeText(mContext, "Position: " + window_position + " " + position, Toast.LENGTH_SHORT).show();
+                Ride ride = mRides.get(position);
+                DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                df1.setTimeZone(TimeZone.getTimeZone("UTC"));
+                Date date;
+                String formattedDate = "";
+                try {
+                    date = df1.parse(ride.getWindowDate());
+                    formattedDate = DateFormat.getDateInstance(DateFormat.FULL).format(date.getTime());
+                }
+                catch(Exception e){}
 
-                RideWindowDialog dialog = RideWindowDialog.newInstance(mFragment,ride, ride.getRideWindows(timeFrame).get(window_position), mDate);
+                RideWindowDialog dialog = RideWindowDialog.newInstance(mFragment,ride, ride.getRideWindows(timeFrame).get(window_position), formattedDate);
                 dialog.show(((Activity) mContext).getFragmentManager() , "NoticeDialogFragment");
             }
         };

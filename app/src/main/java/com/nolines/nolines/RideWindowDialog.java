@@ -19,6 +19,7 @@ import com.squareup.picasso.Picasso;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.TimeZone;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -60,7 +61,9 @@ public class RideWindowDialog extends DialogFragment {
         args.putString("ride_name",ride.getName());
 
         DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        df1.setTimeZone(TimeZone.getTimeZone("UTC"));
         SimpleDateFormat formatter = new SimpleDateFormat("h:mm a");
+        formatter.setTimeZone(TimeZone.getDefault());
         Date windowTime;
 
         try {

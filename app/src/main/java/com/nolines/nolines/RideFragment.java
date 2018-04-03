@@ -46,8 +46,6 @@ public class RideFragment extends Fragment implements Updateable, RideWindowDial
     private RideAdapter mAdapter;
     private RidesHolder rides;
 
-    private Calendar calendar;
-
     @BindView(R.id.recyclerView) RecyclerView recyclerView;
     @BindView(R.id.toolbar) Toolbar toolbar;
     @BindView(R.id.window_tabs) TabLayout tabLayout;
@@ -72,8 +70,6 @@ public class RideFragment extends Fragment implements Updateable, RideWindowDial
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        calendar = Calendar.getInstance();
 
         getRides();
     }
@@ -106,14 +102,15 @@ public class RideFragment extends Fragment implements Updateable, RideWindowDial
                 DatePickerDialog datePickerDialog = new DatePickerDialog(getContext(), new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                        calendar.set(Calendar.YEAR, year);
-                        calendar.set(Calendar.MONTH, monthOfYear);
-                        calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                        String date = DateFormat.getDateInstance(DateFormat.FULL).format(calendar.getTime());
-                        mAdapter.setDate(date);
-                        mAdapter.notifyDataSetChanged();
+                        rides.calendar.set(Calendar.YEAR, year);
+                        rides.calendar.set(Calendar.MONTH, monthOfYear);
+                        rides.calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                        String date = DateFormat.getDateInstance(DateFormat.FULL).format( rides.calendar.getTime());
+                        getRides();
+                        //mAdapter.setDate(date);
+                        //mAdapter.notifyDataSetChanged();
                     }
-                }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
+                }, rides.calendar.get(Calendar.YEAR), rides.calendar.get(Calendar.MONTH), rides.calendar.get(Calendar.DAY_OF_MONTH));
                 datePickerDialog.getDatePicker().setCalendarViewShown(false);
                 datePickerDialog.show();
 
@@ -169,8 +166,13 @@ public class RideFragment extends Fragment implements Updateable, RideWindowDial
     }
     @Override
     public void onRidesUpdate(){
-        mAdapter = new RideAdapter(rides.getRideList(),this.getContext(),this,DateFormat.getDateInstance(DateFormat.FULL).format(calendar.getTime()));
-        recyclerView.setAdapter(mAdapter);
+        if(mAdapter == null){
+            mAdapter = new RideAdapter(rides.getRideList(),this.getContext(),this);
+            recyclerView.setAdapter(mAdapter);
+        }
+        else{
+            mAdapter.updateRideList(rides.getRideList());
+        }
     }
 
     private void setupToolbar(){

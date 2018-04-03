@@ -12,16 +12,8 @@ public class RideWindow {
     private int id;
     @SerializedName("start_time")
     private String startTime;
-    @SerializedName("end_time")
-    private String endTime;
-
-    private Date startDate;
-
-    public RideWindow(int id, String startTime, String endTime) {
-        this.id = id;
-        this.startTime = startTime;
-        this.endTime = endTime;
-    }
+    private int sold;
+    private int limit;
 
     public int getId() {
         return id;
@@ -31,15 +23,11 @@ public class RideWindow {
         return startTime;
     }
 
-    public String getEndTime() {
-        return endTime;
+    public int getSold() {
+        return sold;
     }
 
-    public Date getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(Date startDate) {
-        this.startDate = startDate;
+    public int getLimit() {
+        return limit;
     }
 }

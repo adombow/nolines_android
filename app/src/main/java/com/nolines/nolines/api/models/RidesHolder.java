@@ -11,8 +11,11 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -35,6 +38,7 @@ public class RidesHolder {
     private static final String TAG = "RidesHolder";
 
     private List<Updateable> listeners = new ArrayList<Updateable>();
+    public Calendar calendar;
 
     private static class Holder{
         private static final RidesHolder INSTANCE = new RidesHolder();
@@ -43,9 +47,18 @@ public class RidesHolder {
     private List<Ride> rides;
     private static WeakReference<Context> mContext;
 
-    private RidesHolder() { getRides(); }
+    private RidesHolder() {
+        calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, 16);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        getRides();
+    }
+
     public static RidesHolder getInstance(Context context) {
         mContext = new WeakReference<Context>(context);
+
         return Holder.INSTANCE;
     }
 
@@ -66,7 +79,12 @@ public class RidesHolder {
         Retrofit retrofit = builder.build();
 
         NoLinesClient client = retrofit.create(NoLinesClient.class);
-        Call<List<Ride>> call = client.getRides();
+
+        DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
+        //df1.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String requestDate = df1.format(calendar.getTime());
+
+        Call<List<Ride>> call = client.getRides(requestDate);
 
         call.enqueue(new Callback<List<Ride>>() {
             @Override

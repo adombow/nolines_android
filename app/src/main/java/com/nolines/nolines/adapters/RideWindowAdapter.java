@@ -16,6 +16,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -49,7 +50,9 @@ public class RideWindowAdapter extends RecyclerView.Adapter<RideWindowAdapter.Ri
         RideWindow rideWindow = mRideWindows.get(position);
 
         DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        df1.setTimeZone(TimeZone.getTimeZone("UTC"));
         SimpleDateFormat formatter = new SimpleDateFormat("h:mm a");
+        formatter.setTimeZone(TimeZone.getDefault());
         Date date;
 
         try {
