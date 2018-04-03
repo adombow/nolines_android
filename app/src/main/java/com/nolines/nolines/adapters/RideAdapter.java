@@ -1,29 +1,35 @@
 package com.nolines.nolines.adapters;
-import android.support.annotation.IntDef;
+import android.app.Activity;
+import android.content.Context;
+import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.nolines.nolines.R;
+import com.nolines.nolines.RideFragment;
 import com.nolines.nolines.RideFragment.OnListFragmentInteractionListener;
+import com.nolines.nolines.RideWindowDialog;
 import com.nolines.nolines.api.models.Ride;
+import com.nolines.nolines.api.models.RideWindow;
 import com.squareup.picasso.Picasso;
 
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static com.nolines.nolines.api.models.Ride.AFTERNOON;
-import static com.nolines.nolines.api.models.Ride.EVENING;
 import static com.nolines.nolines.api.models.Ride.MORNING;
 
 /**
@@ -32,15 +38,25 @@ import static com.nolines.nolines.api.models.Ride.MORNING;
  */
 public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder> {
 
-    private final List<Ride> mRides;
-    private final OnListFragmentInteractionListener mListener;
+    private List<Ride> mRides;
+
+    private final Context mContext;
+    private final RideFragment mFragment;
+    private final RecyclerView.RecycledViewPool viewPool;
 
     @Ride.TimeFrame
     private int timeFrame = MORNING;
 
-    public RideAdapter(List<Ride> rides, OnListFragmentInteractionListener listener) {
+    public RideAdapter(List<Ride> rides, Context context, RideFragment fragment) {
         mRides = rides;
-        mListener = listener;
+        mContext = context;
+        mFragment = fragment;
+        viewPool = new RecyclerView.RecycledViewPool();
+    }
+
+    public void updateRideList(List<Ride> rides){
+        mRides = rides;
+        notifyDataSetChanged();
     }
 
     public void setTimeFrame(@Ride.TimeFrame int timeFrame){
@@ -51,36 +67,62 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder
     public RideViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.fragment_ride, parent, false);
+
+
         return new RideViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(final RideViewHolder holder, final int position) {
-        Picasso.get().load(mRides.get(position).getPhotoURL()).into(holder.rideImage);
-        //Picasso.get().load("https://seaworld.scdn3.secure.raxcdn.com/tampa/-/media/busch-gardens-tampa/listing-images/357x229/rides-and-kid-friendly-attractions/2017_buschgardenstampabay_rollercoaster_cheetah_hunt2_357x229.ashx?version=1_201705102808").into(holder.rideImage);
-        holder.rideName.setText(mRides.get(position).getName());
-        holder.subtitle.setText(mRides.get(position).getRideType());
-        // holder.rideWaitTime.setText(Integer.toString(mRides.get(position).getWaitTime()));
+        Ride ride = mRides.get(position);
 
-        switch (timeFrame){
+        Picasso.get().load(ride.getPhotoURL()).into(holder.rideImage);
+        holder.rideName.setText(ride.getName());
+        holder.subtitle.setText(ride.getRideType());
 
-            case MORNING:
-                holder.button1.setText("AM");
-                holder.button2.setText("AM");
-                holder.button3.setText("AM");
-                break;
-            case AFTERNOON:
-                holder.button1.setText("PM");
-                holder.button2.setText("PM");
-                holder.button3.setText("PM");
-                break;
-            case EVENING:
-                holder.button1.setText("EVENING");
-                holder.button2.setText("EVENING");
-                holder.button3.setText("EVENING");
-                break;
+
+        // Set Ride details as window_date from request
+        DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        df1.setTimeZone(TimeZone.getTimeZone("UTC"));
+        Date date;
+        String formattedDate = "";
+        try {
+            date = df1.parse(ride.getWindowDate());
+            formattedDate = DateFormat.getDateInstance(DateFormat.FULL).format(date.getTime());
         }
+        catch(Exception e){}
+        holder.details.setText(formattedDate);
 
+        RecyclerViewClickListener recyclerViewClickListener = new RecyclerViewClickListener() {
+            @Override
+            public void onClick(View view, int window_position) {
+                //Toast.makeText(mContext, "Position: " + window_position + " " + position, Toast.LENGTH_SHORT).show();
+                Ride ride = mRides.get(position);
+                DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                df1.setTimeZone(TimeZone.getTimeZone("UTC"));
+                Date date;
+                String formattedDate = "";
+                try {
+                    date = df1.parse(ride.getWindowDate());
+                    formattedDate = DateFormat.getDateInstance(DateFormat.FULL).format(date.getTime());
+                }
+                catch(Exception e){}
+
+                RideWindowDialog dialog = RideWindowDialog.newInstance(mFragment,ride, ride.getRideWindows(timeFrame).get(window_position), formattedDate);
+                dialog.show(((Activity) mContext).getFragmentManager() , "NoticeDialogFragment");
+            }
+        };
+
+        if(ride.getRideWindows(timeFrame) != null){
+            holder.rideWindowAdapter = new RideWindowAdapter(ride.getRideWindows(timeFrame), recyclerViewClickListener);
+            holder.windowRecyclerView.setRecycledViewPool(viewPool);
+            holder.windowRecyclerView.setAdapter(holder.rideWindowAdapter);
+
+            LinearLayoutManager mLayoutManager = new LinearLayoutManager(mContext);
+            mLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+
+            holder.windowRecyclerView.setLayoutManager(mLayoutManager);
+        }
     }
 
     @Override
@@ -100,17 +142,14 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder
         @BindView(R.id.subtitle) TextView subtitle;
         @BindView(R.id.details) TextView details;
         @BindView(R.id.card_image) ImageView rideImage;
+        @BindView(R.id.window_recycler_view) RecyclerView windowRecyclerView;
 
-        @BindView(R.id.button1) Button button1;
-        @BindView(R.id.button2) Button button2;
-        @BindView(R.id.button3) Button button3;
+        RideWindowAdapter rideWindowAdapter;
 
         public RideViewHolder(View view) {
             super(view);
             ButterKnife.bind(this,view);
 
         }
-
-
     }
 }
