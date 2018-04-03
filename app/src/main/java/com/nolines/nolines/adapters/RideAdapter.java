@@ -1,4 +1,5 @@
 package com.nolines.nolines.adapters;
+
 import android.support.annotation.IntDef;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
@@ -108,9 +109,6 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder
         public RideViewHolder(View view) {
             super(view);
             ButterKnife.bind(this,view);
-
         }
-
-
     }
 }

@@ -48,10 +48,15 @@ import com.google.android.gms.maps.model.Polyline;
 import com.nolines.nolines.api.models.GuestHolder;
 import com.nolines.nolines.api.models.Ride;
 import com.nolines.nolines.api.models.RidesHolder;
+import com.nolines.nolines.api.models.Ticket;
 import com.nolines.nolines.api.service.Updateable;
 import com.squareup.picasso.Picasso;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.TimeZone;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -102,12 +107,13 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
     Marker mLastLocationMarker;
     FusedLocationProviderClient mFusedLocationClient;
 
-    GuestHolder guest;
-    RidesHolder rides;
+    private GuestHolder guest;
+    private RidesHolder rides;
 
     Marker lastSelectedMarker;
     Polyline currentDirections;
     boolean firstLocationFetch = true;
+    int rideFromTicketView = -1;
 
     public MapsFragment() {
         // Required empty public constructor
@@ -134,10 +140,11 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_maps, container, false);
-        //setContentView(R.layout.activity_maps);
+
         ButterKnife.bind(this, view);
 
-        ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
+        toolbar.setTitle(getString(R.string.map_fragment_title));
+        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
         ((MainActivity) getActivity()).setupActionBarDrawerToggle(toolbar);
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this.getContext());
@@ -153,9 +160,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
 
         mapFrag.getMapAsync(this);
 
-        //Refresh the park's rides from the server
-        rides = RidesHolder.getInstance(this.getContext());
-        rides.registerListener(this);
         //Refresh the current guest from the server
         guest = GuestHolder.getInstance(this.getContext());
         guest.registerListener(this);
@@ -163,6 +167,11 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
         //Start the directions button as hidden
         findDirectionsBtn.hide();
         findDirectionsBtn.setOnClickListener(this);
+
+        Bundle args = getArguments();
+        if(args != null){
+            rideFromTicketView = args.getInt(MainActivity.RIDE_ID_ARGUMENT);
+        }
 
         return view;
     }
@@ -227,9 +236,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
         mMap.setInfoWindowAdapter(new MapsFragment.CustomInfoWindowAdapter());
 
         enableMyLocation();
-
-        //Start fetching the rides to display
-        rides.refreshRides();
     }
 
     //Enables the ability to use the user's current location and creates a LocationRequest object
@@ -272,6 +278,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
             mLastLocationMarker.remove();
         }
         if(marker.equals(lastSelectedMarker)){
+            findDirectionsBtn.show();
+            marker.showInfoWindow();
             return true;
         }
         lastSelectedMarker = marker;
@@ -322,35 +330,62 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
     public void onRidesUpdate(){
         // Add marker's for the park's rides
         if(!rides.isEmpty()) {
-            for (int i = 0; i < rides.getRideList().size(); i++) {
-                LatLng latLng = new LatLng(rides.getRideList().get(i).getLat(), rides.getRideList().get(i).getLon());
+            for (Ride ride : rides.getRideList()) {
+                LatLng latLng = new LatLng(ride.getLat(), ride.getLon());
                 MarkerOptions markerOptions = new MarkerOptions();
                 markerOptions.position(latLng);
-                markerOptions.title(rides.getRideList().get(i).getName());
+                markerOptions.title(ride.getName());
                 markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN));
-//                if (!guest.getGuestObject().getTickets().isEmpty()) {
-//                    for (Ticket ticket : guest.getGuestObject().getTickets()) {
-//                        if (ticket.getRideName().equals(rides.getRideList().get(i).getName()))
-//                            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(
-//                                    BitmapDescriptorFactory.HUE_YELLOW));
-//                    }
-//                }
+                markerOptions.snippet(ride.getRideType() + "\n" + getString(R.string.wait_time) + ride.getWaitTime());
+                if (guest != null && !guest.getGuestObject().getTickets().isEmpty()) {
+                    for (Ticket ticket : guest.getGuestObject().getTickets()) {
+                        if (ticket.getRide().getName().equals(ride.getName())) {
+                            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(
+                                    BitmapDescriptorFactory.HUE_YELLOW));
+
+                            Calendar cal = ticket.getLocalDatetimeFromTime();
+                            SimpleDateFormat formatter = new SimpleDateFormat("h:mm a");
+                            formatter.setTimeZone(TimeZone.getDefault());
+
+                            String startTime = formatter.format(cal.getTime());
+                            cal.add(Calendar.HOUR, 1);
+                            String endTime = formatter.format(cal.getTime());
+
+                            markerOptions.snippet(getString(R.string.ride_window_text, startTime, endTime) +
+                                    "\n" + getString(R.string.wait_time) + ride.getWaitTime());
+                        }
+                    }
+                }
                 mMap.addMarker(markerOptions);
+                if(rideFromTicketView == ride.getId()){
+                    displayRouteFromCurrentLocation(latLng);
+                }
             }
         }
     }
 
     @Override
     public void onGuestUpdate(){
-
+        //Refresh the park's rides from the server
+        rides = RidesHolder.getInstance(this.getContext());
+        rides.registerListener(this);
+        //Start fetching the rides to display
+        rides.refreshRides();
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    @Override
+    public void onDestroy(){
+        if(rides == null)
+            rides = RidesHolder.getInstance(this.getContext());
         rides.unregisterListener(this);
         guest.unregisterListener(this);
+        super.onDestroy();
     }
 
     @Override
@@ -361,6 +396,13 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
             showMissingPermissionError();
             mPermissionDenied = false;
         }
+        if(rides == null){
+            //Refresh the park's rides from the server
+            rides = RidesHolder.getInstance(this.getContext());
+            rides.registerListener(this);
+        }
+        //Start fetching the rides to display
+        rides.refreshRides();
     }
 
     /**
@@ -371,12 +413,13 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
                 .newInstance(true).show(getFragmentManager(), "dialog");
     }
 
-    private void displayRoute(LatLng start, LatLng end){
-        //Place current location marker
+    private void displayRouteFromCurrentLocation(LatLng end){
+        if(mLastLocationMarker != null)
+            mLastLocationMarker.remove();
         LatLng latLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(latLng);
-        markerOptions.title("Current Position");
+        markerOptions.title("Your location");
         markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
         mLastLocationMarker = mMap.addMarker(markerOptions);
 
@@ -385,7 +428,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
         //GoogleDirection.withServerKey(bundle.getString("com.google.android.geo.API_KEY"));
         //TODO: USE ABOVE TO GET KEY INSTEAD
         GoogleDirection.withServerKey("AIzaSyAr2G3Jc26ZM7EPFB3rr5KMs44OmcThBHk")
-                .from(start)
+                .from(mLastLocationMarker.getPosition())
                 .to(end)
                 .transportMode(TransportMode.WALKING)
                 .execute(this);
@@ -420,24 +463,14 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.dirFab) {
-            if(mLastLocationMarker != null)
-                mLastLocationMarker.remove();
-            LatLng latLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
-            MarkerOptions markerOptions = new MarkerOptions();
-            markerOptions.position(latLng);
-            markerOptions.title("Your location");
-            markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-            mLastLocationMarker = mMap.addMarker(markerOptions);
-            displayRoute(mLastLocationMarker.getPosition(), lastSelectedMarker.getPosition());
+            displayRouteFromCurrentLocation(lastSelectedMarker.getPosition());
         }
     }
 
     //Class for our custom info window when marker clicked
     class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter{
-        @BindView(R.id.markerpic)
-        ImageView markerPic;
-        @BindView(R.id.markername)
-        TextView markerName;
+        @BindView(R.id.markerpic) ImageView markerPic;
+        @BindView(R.id.markername) TextView markerName;
         @BindView(R.id.markerinfo) TextView markerInfo;
 
         //private final View mWindow;
@@ -466,29 +499,23 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
         private void render(Marker marker, View view){
             //Make everything blank in case we don't find the ride
             markerPic.setImageResource(0);
-            markerName.setText("");
-            markerInfo.setText("");
+
+            SpannableString titleText = new SpannableString(marker.getTitle());
+            titleText.setSpan(new ForegroundColorSpan(Color.RED), 0, titleText.length(), 0);
+            markerName.setText(titleText);
+
+            titleText = new SpannableString(marker.getSnippet());
+            titleText.setSpan(new ForegroundColorSpan(Color.BLACK), 0, titleText.length(), 0);
+            markerInfo.setText(titleText);
+
             for(Ride ride : rides.getRideList()){
                 if(marker.getTitle().equals(ride.getName())) {
-                    //Picasso.get().load(ride.getPhotoURL()).into(markerPic);
                     Picasso.get()
-                            .load("http://i.imgur.com/r6EAcbN.jpg")
-                            .placeholder(R.drawable.logo)
+                            //.load("http://i.imgur.com/r6EAcbN.jpg")
+                            .load(ride.getPhotoURL())
                             .resize(200, 200)
                             .centerCrop()
                             .into(markerPic);
-
-                    if( !ride.getName().equals("") ){
-                        SpannableString titleText = new SpannableString(ride.getName());
-                        titleText.setSpan(new ForegroundColorSpan(Color.RED), 0, titleText.length(), 0);
-                        markerName.setText(titleText);
-                    }
-
-                    if( !ride.getRideType().equals("") ) {
-                        SpannableString infoText = new SpannableString(ride.getRideType());
-                        infoText.setSpan(new ForegroundColorSpan(Color.MAGENTA), 0, infoText.length(), 0);
-                        markerInfo.setText(infoText);
-                    }
                     break;
                 }
             }

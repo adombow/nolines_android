@@ -63,7 +63,7 @@ public class RidesHolder {
         call.enqueue(new Callback<List<Ride>>() {
             @Override
             public void onResponse(Call<List<Ride>> call, Response<List<Ride>> response) {
-                Log.i(TAG, "Repsonse Recieved");
+                Log.i(TAG, "Response Received");
                 rides = response.body();
                 for(Updateable listener : listeners){
                     try{

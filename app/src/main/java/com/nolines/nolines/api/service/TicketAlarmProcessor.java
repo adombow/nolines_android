@@ -25,6 +25,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.TimeZone;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -33,10 +34,15 @@ import java.util.Locale;
  */
 public class TicketAlarmProcessor extends IntentService {
 
-    public static final int timeToAlert = 90; //Time before the event to send an alert for (in seconds)
+    public static final int timeToAlert = 300; //Time before the event to send an alert for (in seconds)
 
     private static final String ACTION_CHECK_TICKETS = "com.nolines.nolines.api.service.action.CHECK_TICKETS";
     public static final String NOTIFICATION_TICKET_ID = "com.nolines.nolines.NOTIFICATION_TICKET_ID";
+    public static final String NOTIFICATION_TYPE = "com.nolines.nolines.NOTIFICATION_TYPE";
+
+    public enum NotificationType{
+        PRE_OPEN, OPEN, PRE_CLOSE, CLOSE
+    }
 
     public TicketAlarmProcessor() {
         super("TicketAlarmProcessor");
@@ -48,9 +54,10 @@ public class TicketAlarmProcessor extends IntentService {
      *
      * @see IntentService
      */
-    public static void startActionCheckTickets(Context context, int rideID) {
+    public static void startActionCheckTickets(Context context, int rideID, NotificationType type) {
         Intent intent = new Intent(context, TicketAlarmProcessor.class);
         intent.putExtra(NOTIFICATION_TICKET_ID, rideID);
+        intent.putExtra(NOTIFICATION_TYPE, type);
         intent.setAction(ACTION_CHECK_TICKETS);
         context.startService(intent);
     }
@@ -62,9 +69,10 @@ public class TicketAlarmProcessor extends IntentService {
             if (ACTION_CHECK_TICKETS.equals(action)) {
                 Bundle extras = intent.getExtras();
                 if(extras == null){
-                    handleActionCheckTickets(0);
+                    handleActionCheckTickets(-1, NotificationType.CLOSE);
                 }else{
-                    handleActionCheckTickets(extras.getInt(TicketAlarmProcessor.NOTIFICATION_TICKET_ID));
+                    handleActionCheckTickets(extras.getInt(NOTIFICATION_TICKET_ID),
+                            (NotificationType) extras.getSerializable(NOTIFICATION_TYPE));
                 }
             }
         }
@@ -74,7 +82,7 @@ public class TicketAlarmProcessor extends IntentService {
      * Handle action Check Tickets in the provided background thread with the provided
      * parameters.
      */
-    private void handleActionCheckTickets(int rideID) {
+    private void handleActionCheckTickets(int rideID, NotificationType type) {
         //if shared preferences notification toggle is off, don't send notification
         Guest guest = GuestHolder.getInstance(this).getGuestObject();
         Ticket ticket = null;
@@ -108,27 +116,26 @@ public class TicketAlarmProcessor extends IntentService {
         PendingIntent resultPendingIntent =
                 stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        String notificationTitle = getString(R.string.notification_title);
+        String notificationTitle = getString(R.string.notification_title, "Test");
         String notificationText = getString(R.string.notification_generic);
         if(ticket != null){
             notificationTitle = getString(R.string.notification_title, ticket.getRide().getName());
-            switch(ticket.getNotificationsLeft()){
-                case 4:
+            switch(type){
+                case PRE_OPEN:
                     notificationText = getResources().getQuantityString(R.plurals.pre_window_open, timeToAlert/60, timeToAlert/60);
                     break;
-                case 3:
+                case OPEN:
                     notificationText = getString(R.string.window_open);
                     break;
-                case 2:
+                case PRE_CLOSE:
                     notificationText = getResources().getQuantityString(R.plurals.pre_window_close, timeToAlert/60, timeToAlert/60);
                     break;
-                case 1:
+                case CLOSE:
                     notificationText = getString(R.string.window_close);
                     break;
                 default:
                     break;
             }
-            ticket.reduceNotificationsLeft();
         }
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, "default")
                 .setSmallIcon(R.drawable.logo)
@@ -174,18 +181,20 @@ public class TicketAlarmProcessor extends IntentService {
         AlarmManager alarmManager = (AlarmManager)context.getSystemService(context.ALARM_SERVICE);
 
         //Get the start and end times of the ticket in seconds
-        long startTime = getTimeInMillis(ticket.getStartTime())/1000;
-        long endTime = getTimeInMillis(ticket.getEndTime())/1000;
+        long startTime = ticket.getLocalDatetimeFromTime().getTimeInMillis()/1000;
+        long endTime = startTime + 360; //Ride windows are 1 hour
 
         int timeUntilStart = (int)(startTime - new Date().getTime()/1000);
         //if there are more than timeToAlert seconds until the ride window opens then add
         //an alert for it at timeToAlert seconds before the window opens and when the window opens
         if(timeUntilStart > 60){
+            ticketProcessorReceiver.putExtra(NOTIFICATION_TYPE, NotificationType.OPEN);
             PendingIntent pendingIntent = PendingIntent.getBroadcast(context,
                     ticket.hashCode(), ticketProcessorReceiver, 0);
             alarmManager.set(AlarmManager.RTC_WAKEUP, startTime * 1000, pendingIntent);
 
             if(timeUntilStart > TicketAlarmProcessor.timeToAlert) {
+                ticketProcessorReceiver.putExtra(NOTIFICATION_TYPE, NotificationType.PRE_OPEN);
                 pendingIntent = PendingIntent.getBroadcast(context,
                         ticket.hashCode() + 1, ticketProcessorReceiver, 0);
                 alarmManager.set(AlarmManager.RTC_WAKEUP, (startTime - TicketAlarmProcessor.timeToAlert) * 1000, pendingIntent);
@@ -196,29 +205,18 @@ public class TicketAlarmProcessor extends IntentService {
         //if there are more than timeToAlert seconds until the ride window closes then add
         //an alert for it at timeToAlert seconds before the window closes and when the window closes
         if(timeUntilEnd > 60) {
+            ticketProcessorReceiver.putExtra(NOTIFICATION_TYPE, NotificationType.CLOSE);
             PendingIntent pendingIntent = PendingIntent.getBroadcast(context,
                     ticket.hashCode() + 2, ticketProcessorReceiver, 0);
             alarmManager.set(AlarmManager.RTC_WAKEUP, endTime * 1000, pendingIntent);
 
             if (timeUntilEnd > TicketAlarmProcessor.timeToAlert) {
+                ticketProcessorReceiver.putExtra(NOTIFICATION_TYPE, NotificationType.PRE_CLOSE);
                 pendingIntent = PendingIntent.getBroadcast(context,
                         ticket.hashCode() + 3, ticketProcessorReceiver, 0);
                 alarmManager.set(AlarmManager.RTC_WAKEUP, (endTime - TicketAlarmProcessor.timeToAlert) * 1000, pendingIntent);
             }
         }
-    }
-
-    //TODO: Localise so that this works for any region
-    //Gets the time in milliseconds of the string time
-    private static long getTimeInMillis(String time){
-        DateFormat df = new SimpleDateFormat("E MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
-        long millisTime;
-        try{
-            millisTime = df.parse(time).getTime();
-        } catch (ParseException e){
-            millisTime = -1;
-        }
-        return millisTime;
     }
 }
 

@@ -22,12 +22,13 @@
     <!-- Activities -->
     <string name="title_activity_ar">ARActivity</string>
     <string name="title_activity_ticket_select">NoLines Reservations</string>
-    <string name="title_activity_maps">Map</string>
-    <string name="title_activity_map_">Map_Activity</string>
     <string name="title_activity_view_tickets">ViewTicketsActivity</string>
 
     <!-- Fragments -->
     <string name="map_fragment_title">Park Map</string>
+    <string name="ride_window_text">%1s - %2s</string>
+    <string name="ticket_fragment_title">Your Tickets</string>
+    <string name="no_tickets_message">You don\'t have any tickets for this date!</string>
 
     <!--    Permissions    -->
     <string name="permission_rationale_location">Access to the location service is required to view the park map.</string>

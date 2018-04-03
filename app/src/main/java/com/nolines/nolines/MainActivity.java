@@ -14,7 +14,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.nolines.nolines.api.models.Guest;
 import com.nolines.nolines.api.models.Ride;
+import com.nolines.nolines.api.models.Ticket;
 import com.nolines.nolines.dummy.DummyContent;
 
 import butterknife.BindView;
@@ -24,7 +26,10 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         RideFragment.OnListFragmentInteractionListener,
         HomeFragment.OnListFragmentInteractionListener,
+        TicketFragment.OnListFragmentInteractionListener,
         MapsFragment.OnFragmentInteractionListener{
+
+    public static final String RIDE_ID_ARGUMENT = "com.nolines.nolines.RIDE_ID_ARGUMENT";
 
     @BindView(R.id.drawer_layout) DrawerLayout drawer;
     @BindView(R.id.nav_view) NavigationView navigationView;
@@ -137,6 +142,25 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onListFragmentInteraction(DummyContent.DummyItem item){}
+
+    @Override
+    public void onListFragmentInteraction(Ticket ticket){
+        //TODO: Open map view with this ticket selected
+        Fragment fragment = null;
+        try {
+            fragment = (Fragment) MapsFragment.class.newInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if(fragment != null){
+            Bundle args = new Bundle();
+            args.putInt(RIDE_ID_ARGUMENT, ticket.getId());
+            fragment.setArguments(args);
+            getSupportFragmentManager().beginTransaction().
+                    replace(R.id.fragment_container, fragment).
+                    addToBackStack(null).commit();
+        }
+    }
 
     @Override
     public void onFragmentInteraction(Uri uri){}

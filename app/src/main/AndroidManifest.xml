@@ -36,25 +36,6 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyAr2G3Jc26ZM7EPFB3rr5KMs44OmcThBHk" />
-
-        <activity
-            android:name=".TicketSelectActivity"
-            android:label="@string/title_activity_ticket_select"
-            android:parentActivityName=".MainActivity"
-            android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.nolines.nolines.MainActivity" />
-        </activity>
-        <activity
-            android:name=".ViewTicketsActivity"
-            android:label="@string/title_activity_view_tickets"
-            android:parentActivityName=".MainActivity"
-            android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.nolines.nolines.MainActivity" />
-        </activity>
         <service
             android:name=".api.service.TicketAlarmProcessor"
             android:exported="false"/>
