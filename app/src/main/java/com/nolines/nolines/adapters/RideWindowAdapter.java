@@ -11,8 +11,10 @@ import android.widget.Button;
 import com.nolines.nolines.R;
 import com.nolines.nolines.RideFragment;
 import com.nolines.nolines.api.models.RideWindow;
+import com.nolines.nolines.api.models.Ticket;
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;

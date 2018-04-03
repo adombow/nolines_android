@@ -1,31 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "C:\\media\\andrew\\AndrewSTRG\\UBC\\CPEN_391_Repo\\nolines_android\\opencv\\build\\intermediates\\incremental\\mergeDebugAndroidTestResources\\merged.dir\\values\\values.xml",
-            "map": []
-        },
-        {
-            "outputFile": "F:\\UBC\\CPEN_391_Repo\\nolines_android\\opencv\\build\\intermediates\\incremental\\mergeDebugAndroidTestResources\\merged.dir\\values\\values.xml",
-            "map": []
-        },
-        {
-            "outputFile": "C:\\Users\\timot\\AndroidStudioProjects\\NoLines\\opencv\\build\\intermediates\\incremental\\mergeDebugAndroidTestResources\\merged.dir\\values\\values.xml",
-            "map": []
-        },
-        {
-            "outputFile": "C:\\media\\andrew\\AndrewSTRG\\UBC\\CPEN_391_Repo\\nolines_android\\F:\\UBC\\CPEN_391_Repo\\nolines_android\\opencv\\build\\intermediates\\incremental\\mergeDebugAndroidTestResources\\merged.dir\\values\\values.xml",
-            "map": []
-        },
-        {
-            "outputFile": "C:\\media\\andrew\\AndrewSTRG\\UBC\\CPEN_391_Repo\\nolines_android\\F:\\media\\andrew\\AndrewSTRG\\UBC\\CPEN_391_Repo\\nolines_android\\F:\\UBC\\CPEN_391_Repo\\nolines_android\\opencv\\build\\intermediates\\incremental\\mergeDebugAndroidTestResources\\merged.dir\\values\\values.xml",
-            "map": []
-        },
-        {
-            "outputFile": "C:\\media\\andrew\\AndrewSTRG\\UBC\\CPEN_391_Repo\\nolines_android\\F:\\media\\andrew\\AndrewSTRG\\UBC\\CPEN_391_Repo\\nolines_android\\opencv\\build\\intermediates\\incremental\\mergeDebugAndroidTestResources\\merged.dir\\values\\values.xml",
-            "map": []
-        },
-        {
-            "outputFile": "C:\\media\\andrew\\AndrewSTRG\\UBC\\CPEN_391_Repo\\nolines_android\\F:\\media\\andrew\\AndrewSTRG\\UBC\\CPEN_391_Repo\\nolines_android\\C:\\Users\\timot\\AndroidStudioProjects\\NoLines\\opencv\\build\\intermediates\\incremental\\mergeDebugAndroidTestResources\\merged.dir\\values\\values.xml",
+            "outputFile": "/media/andrew/AndrewSTRG/UBC/CPEN_391_Repo/nolines_android/opencv/build/intermediates/incremental/mergeDebugAndroidTestResources/merged.dir/values/values.xml",
             "map": []
         }
     ]
