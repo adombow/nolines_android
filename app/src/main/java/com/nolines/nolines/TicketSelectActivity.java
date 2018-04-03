@@ -85,9 +85,6 @@ public class TicketSelectActivity extends AppCompatActivity
             Intent intent = new Intent(this, ARActivity.class);
             startActivity(intent);
         } else if (id == R.id.nav_Map) {
-            //Intent intent = new Intent(this, MapsDrawerActivity.class);
-            Intent intent = new Intent(this, MapsActivity.class);
-            startActivity(intent);
         } else if (id == R.id.nav_Rides){
             drawer.closeDrawer(GravityCompat.START);
         } else if (id == R.id.nav_Tickets){

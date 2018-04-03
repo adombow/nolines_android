@@ -1,19 +1,25 @@
 package com.nolines.nolines;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Looper;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
-import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -50,7 +56,16 @@ import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback,
+
+/**
+ * A simple {@link Fragment} subclass.
+ * Activities that contain this fragment must implement the
+ * {@link MapsFragment.OnFragmentInteractionListener} interface
+ * to handle interaction events.
+ * Use the {@link MapsFragment#newInstance} factory method to
+ * create an instance of this fragment.
+ */
+public class MapsFragment extends Fragment implements OnMapReadyCallback,
         Updateable,
         ActivityCompat.OnRequestPermissionsResultCallback,
         GoogleMap.OnMyLocationButtonClickListener,
@@ -62,7 +77,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         DirectionCallback,
         View.OnClickListener{
 
+    @BindView(R.id.toolbar) Toolbar toolbar;
     @BindView(R.id.dirFab) FloatingActionButton findDirectionsBtn;
+    private MainActivity appCompatActivity;
+    private OnFragmentInteractionListener mListener;
 
     /**
      * Request code for location permission request.
@@ -84,8 +102,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     Marker mLastLocationMarker;
     FusedLocationProviderClient mFusedLocationClient;
 
-    Marker mChildLocationMarker;
-    Location mChildLastLocation = null;
     GuestHolder guest;
     RidesHolder rides;
 
@@ -93,17 +109,41 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     Polyline currentDirections;
     boolean firstLocationFetch = true;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_maps);
-        ButterKnife.bind(this);
+    public MapsFragment() {
+        // Required empty public constructor
+    }
 
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+    /**
+     * Use this factory method to create a new instance of
+     * this fragment using the provided parameters.
+     *
+     * @return A new instance of fragment MapsFragment.
+     */
+    public static MapsFragment newInstance() {
+        MapsFragment fragment = new MapsFragment();
+        return fragment;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        View view = inflater.inflate(R.layout.fragment_maps, container, false);
+        //setContentView(R.layout.activity_maps);
+        ButterKnife.bind(this, view);
+
+        ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
+        ((MainActivity) getActivity()).setupActionBarDrawerToggle(toolbar);
+
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this.getContext());
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        mapFrag = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
+        mapFrag = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
 
         //retain map layout if screen reset
         if (savedInstanceState == null) {
@@ -114,16 +154,45 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapFrag.getMapAsync(this);
 
         //Refresh the park's rides from the server
-        rides = RidesHolder.getInstance(this);
+        rides = RidesHolder.getInstance(this.getContext());
         rides.registerListener(this);
         //Refresh the current guest from the server
-        guest = GuestHolder.getInstance(this);
+        guest = GuestHolder.getInstance(this.getContext());
         guest.registerListener(this);
 
         //Start the directions button as hidden
         findDirectionsBtn.hide();
         findDirectionsBtn.setOnClickListener(this);
+
+        return view;
     }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnFragmentInteractionListener) {
+            mListener = (OnFragmentInteractionListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnFragmentInteractionListener");
+        }
+    }
+
+    //Callback for each time thee current location is updated
+    LocationCallback mLocationCallback = new LocationCallback(){
+        @Override
+        public void onLocationResult(LocationResult locationResult) {
+            for (Location location : locationResult.getLocations()) {
+                mLastLocation = location;
+            }
+
+            if(firstLocationFetch){
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()), 14));
+                firstLocationFetch = false;
+            }
+            // Add a marker for the guest's child location (if available)
+        }
+    };
 
     @Override
     public void onPause() {
@@ -155,42 +224,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.setOnInfoWindowCloseListener(this);
         mMap.setOnInfoWindowClickListener(this);
-        mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter());
+        mMap.setInfoWindowAdapter(new MapsFragment.CustomInfoWindowAdapter());
 
         enableMyLocation();
 
         //Start fetching the rides to display
         rides.refreshRides();
     }
-
-    //Callback for each time thee current location is updated
-    LocationCallback mLocationCallback = new LocationCallback(){
-        @Override
-        public void onLocationResult(LocationResult locationResult) {
-            for (Location location : locationResult.getLocations()) {
-                //Log.i("MapsActivity", "Location: " + location.getLatitude() + " " + location.getLongitude());
-                mLastLocation = location;
-            }
-
-            if(firstLocationFetch){
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()), 14));
-                firstLocationFetch = false;
-            }
-
-            // Add a marker for the guest's child location (if available)
-
-            //mChildLastLocation = ;  //Get the new child location
-            if(mChildLocationMarker != null) {
-                mChildLocationMarker.remove();
-                LatLng latLng = new LatLng(mChildLastLocation.getLatitude(), mChildLastLocation.getLongitude());
-                MarkerOptions markerOptions = new MarkerOptions();
-                markerOptions.position(latLng);
-                markerOptions.title("Your child");
-                markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-                mChildLocationMarker = mMap.addMarker(markerOptions);
-            }
-        }
-    };
 
     //Enables the ability to use the user's current location and creates a LocationRequest object
     //To fetch the current location on a loop
@@ -201,9 +241,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
 
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(this.getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 // Permission to access the location is missing.
-                PermissionUtils.requestPermission(this, LOCATION_PERMISSION_REQUEST_CODE, Manifest.permission.ACCESS_FINE_LOCATION, true);
+                PermissionUtils.requestPermission((AppCompatActivity) getActivity(), LOCATION_PERMISSION_REQUEST_CODE, Manifest.permission.ACCESS_FINE_LOCATION, true);
             } else if (mMap != null) {
                 // Access to the location has been granted to the app.
                 mFusedLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
@@ -215,7 +255,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             mMap.setMyLocationEnabled(true);
         }
     }
-    
+
     @Override
     public void onMapClick(LatLng point){
         if (mLastLocationMarker != null) {
@@ -253,7 +293,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onInfoWindowClick(Marker marker){
-        Toast.makeText(this, "Info Window Clicked!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this.getContext(), "Info Window Clicked!", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -306,15 +346,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     @Override
-    public void onDestroy(){
-        super.onDestroy();
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
         rides.unregisterListener(this);
         guest.unregisterListener(this);
     }
 
     @Override
-    protected void onResumeFragments() {
-        super.onResumeFragments();
+    public void onResume() {
+        super.onResume();
         if (mPermissionDenied) {
             // Permission was not granted, display error dialog.
             showMissingPermissionError();
@@ -327,7 +368,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
      */
     private void showMissingPermissionError() {
         PermissionUtils.PermissionDeniedDialog
-                .newInstance(true).show(getSupportFragmentManager(), "dialog");
+                .newInstance(true).show(getFragmentManager(), "dialog");
     }
 
     private void displayRoute(LatLng start, LatLng end){
@@ -353,20 +394,20 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onDirectionSuccess(Direction direction, String rawBody) {
         if(direction.isOK()){
-            Toast.makeText(this, "Getting directions...", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this.getContext(), "Getting directions...", Toast.LENGTH_SHORT).show();
             Route route = direction.getRouteList().get(0);
             ArrayList<LatLng> directionPositionList = route.getLegList().get(0).getDirectionPoint();
-            currentDirections = mMap.addPolyline(DirectionConverter.createPolyline(this,
+            currentDirections = mMap.addPolyline(DirectionConverter.createPolyline(this.getContext(),
                     directionPositionList, 5, Color.RED));
             setCameraWithinCoordinationBounds(route);
         }else{
-            Toast.makeText(this, direction.getErrorMessage(), Toast.LENGTH_LONG).show();
+            Toast.makeText(this.getContext(), direction.getErrorMessage(), Toast.LENGTH_LONG).show();
         }
     }
 
     @Override
     public void onDirectionFailure(Throwable t) {
-        Toast.makeText(this, t.getMessage(), Toast.LENGTH_LONG).show();
+        Toast.makeText(this.getContext(), t.getMessage(), Toast.LENGTH_LONG).show();
     }
 
     private void setCameraWithinCoordinationBounds(Route route){
@@ -393,8 +434,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     //Class for our custom info window when marker clicked
     class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter{
-        @BindView(R.id.markerpic) ImageView markerPic;
-        @BindView(R.id.markername) TextView markerName;
+        @BindView(R.id.markerpic)
+        ImageView markerPic;
+        @BindView(R.id.markername)
+        TextView markerName;
         @BindView(R.id.markerinfo) TextView markerInfo;
 
         //private final View mWindow;
@@ -450,5 +493,20 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
             }
         }
+    }
+
+    /**
+     * This interface must be implemented by activities that contain this
+     * fragment to allow an interaction in this fragment to be communicated
+     * to the activity and potentially other fragments contained in that
+     * activity.
+     * <p>
+     * See the Android Training lesson <a href=
+     * "http://developer.android.com/training/basics/fragments/communicating.html"
+     * >Communicating with Other Fragments</a> for more information.
+     */
+    public interface OnFragmentInteractionListener {
+        // TODO: Update argument type and name
+        void onFragmentInteraction(Uri uri);
     }
 }

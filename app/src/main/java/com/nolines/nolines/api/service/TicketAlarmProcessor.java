@@ -13,13 +13,11 @@ import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.app.TaskStackBuilder;
-import android.widget.Toast;
 
-import com.nolines.nolines.MapsActivity;
+import com.nolines.nolines.MapsFragment;
 import com.nolines.nolines.R;
 import com.nolines.nolines.api.models.Guest;
 import com.nolines.nolines.api.models.GuestHolder;
-import com.nolines.nolines.api.models.Ride;
 import com.nolines.nolines.api.models.Ticket;
 
 import java.text.DateFormat;
@@ -101,7 +99,7 @@ public class TicketAlarmProcessor extends IntentService {
         }
 
         // Create an Intent for the activity you want to start
-        Intent resultIntent = new Intent(this, MapsActivity.class);
+        Intent resultIntent = new Intent(this, MapsFragment.class);
         resultIntent.putExtra(NOTIFICATION_TICKET_ID, rideID);
         // Create the TaskStackBuilder and add the intent, which inflates the back stack
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);

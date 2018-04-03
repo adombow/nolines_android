@@ -51,8 +51,8 @@ public class RidesHolder {
 
         /* Modify Later to put baseUrl globally*/
         Retrofit.Builder builder = new Retrofit.Builder()
-                //.baseUrl("http://nolines-production.herokuapp.com/")
-                .baseUrl("http://128.189.92.71:3001/")
+                .baseUrl("http://nolines-production.herokuapp.com/")
+                //.baseUrl("http://128.189.92.71:3001/")
                 .addConverterFactory(GsonConverterFactory.create());
 
         Retrofit retrofit = builder.build();

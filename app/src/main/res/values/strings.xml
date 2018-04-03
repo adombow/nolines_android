@@ -11,7 +11,7 @@
 
     <!-- Drawer Entries -->
     <string name="drawer_home">Home</string>
-    <string name="drawer_map">Map View</string>
+    <string name="drawer_map">Park Map</string>
     <string name="drawer_ticket_select">Make a Reservation</string>
     <string name="drawer_AR">ARActivity</string>
     <string name="settings">Settings</string>
@@ -24,8 +24,10 @@
     <string name="title_activity_ticket_select">NoLines Reservations</string>
     <string name="title_activity_maps">Map</string>
     <string name="title_activity_map_">Map_Activity</string>
-    <string name="title_activity_maps_drawer">MapsDrawerActivity</string>
     <string name="title_activity_view_tickets">ViewTicketsActivity</string>
+
+    <!-- Fragments -->
+    <string name="map_fragment_title">Park Map</string>
 
     <!--    Permissions    -->
     <string name="permission_rationale_location">Access to the location service is required to view the park map.</string>

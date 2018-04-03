@@ -47,22 +47,6 @@
                 android:value="com.nolines.nolines.MainActivity" />
         </activity>
         <activity
-            android:name=".MapsActivity"
-            android:label="@string/title_activity_maps">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.nolines.nolines.MainActivity" />
-        </activity>
-        <activity
-            android:name=".MapsDrawerActivity"
-            android:label="@string/title_activity_maps_drawer"
-            android:parentActivityName=".MainActivity"
-            android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.nolines.nolines.MainActivity" />
-        </activity>
-        <activity
             android:name=".ViewTicketsActivity"
             android:label="@string/title_activity_view_tickets"
             android:parentActivityName=".MainActivity"
