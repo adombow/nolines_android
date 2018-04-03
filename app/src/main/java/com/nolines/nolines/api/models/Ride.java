@@ -1,11 +1,13 @@
 package com.nolines.nolines.api.models;
 
 import android.support.annotation.IntDef;
+import android.view.Window;
 
 import com.google.gson.annotations.SerializedName;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -26,6 +28,9 @@ public class Ride {
     @SerializedName("picture_url")
     private String photoURL;
 
+    @SerializedName("window_date")
+    private String windowDate;
+
     @SerializedName("morning_windows")
     private List<RideWindow> morningWindows;
     @SerializedName("afternoon_windows")
@@ -40,7 +45,6 @@ public class Ride {
     @IntDef({MORNING, AFTERNOON, EVENING})
     @Retention(RetentionPolicy.SOURCE)
     public @interface TimeFrame {}
-
 
     public String getName() {
         return name;
@@ -74,16 +78,28 @@ public class Ride {
         return id;
     }
 
+    public String getWindowDate() {
+        return windowDate;
+    }
+
     public List<RideWindow> getRideWindows(@TimeFrame int timeframe) {
 
         switch (timeframe){
             case MORNING:
+                if(morningWindows == null)
+                    morningWindows = new ArrayList<>();
                 return morningWindows;
             case AFTERNOON:
+                if(afternoonWindows == null)
+                    afternoonWindows = new ArrayList<>();
                 return afternoonWindows;
             case EVENING:
+                if(eveningWindows == null)
+                    eveningWindows = new ArrayList<>();
                 return eveningWindows;
             default:
+                if(morningWindows == null)
+                    morningWindows = new ArrayList<>();
                 return morningWindows;
         }
     }

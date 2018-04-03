@@ -1,6 +1,7 @@
 package com.nolines.nolines;
 
 import android.app.DatePickerDialog;
+import android.app.DialogFragment;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -36,7 +37,7 @@ import butterknife.ButterKnife;
  * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
  * interface.
  */
-public class RideFragment extends Fragment implements Updateable{
+public class RideFragment extends Fragment implements Updateable, RideWindowDialog.RideWindowDialogListener{
     private static final String TAG = "RideFragment";
     private static final String ARG_COLUMN_COUNT = "column-count";
 
@@ -44,8 +45,6 @@ public class RideFragment extends Fragment implements Updateable{
 
     private RideAdapter mAdapter;
     private RidesHolder rides;
-
-    private Calendar calendar;
 
     @BindView(R.id.recyclerView) RecyclerView recyclerView;
     @BindView(R.id.toolbar) Toolbar toolbar;
@@ -71,8 +70,6 @@ public class RideFragment extends Fragment implements Updateable{
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        calendar = Calendar.getInstance();
 
         getRides();
     }
@@ -105,16 +102,15 @@ public class RideFragment extends Fragment implements Updateable{
                 DatePickerDialog datePickerDialog = new DatePickerDialog(getContext(), new DatePickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                        calendar.set(Calendar.YEAR, year);
-                        calendar.set(Calendar.MONTH, monthOfYear);
-                        calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                        String date = DateFormat.getDateInstance(DateFormat.MEDIUM).format(calendar.getTime());
-                        Log.i(TAG,date);
-                        //btn_dialog_7.setText(date);
-                        //
-                        // dateTextView.setText(date);
+                        rides.calendar.set(Calendar.YEAR, year);
+                        rides.calendar.set(Calendar.MONTH, monthOfYear);
+                        rides.calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                        String date = DateFormat.getDateInstance(DateFormat.FULL).format( rides.calendar.getTime());
+                        getRides();
+                        //mAdapter.setDate(date);
+                        //mAdapter.notifyDataSetChanged();
                     }
-                }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH));
+                }, rides.calendar.get(Calendar.YEAR), rides.calendar.get(Calendar.MONTH), rides.calendar.get(Calendar.DAY_OF_MONTH));
                 datePickerDialog.getDatePicker().setCalendarViewShown(false);
                 datePickerDialog.show();
 
@@ -169,8 +165,13 @@ public class RideFragment extends Fragment implements Updateable{
 
     @Override
     public void onRidesUpdate(){
-        mAdapter = new RideAdapter(rides.getRideList(),mListener);
-        recyclerView.setAdapter(mAdapter);
+        if(mAdapter == null){
+            mAdapter = new RideAdapter(rides.getRideList(),this.getContext(),this);
+            recyclerView.setAdapter(mAdapter);
+        }
+        else{
+            mAdapter.updateRideList(rides.getRideList());
+        }
     }
 
     private void setupToolbar(){
@@ -186,6 +187,10 @@ public class RideFragment extends Fragment implements Updateable{
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
+
+                if(mAdapter == null)
+                    return;
+
                 int position = tab.getPosition();
 
                 switch(position){
@@ -218,5 +223,10 @@ public class RideFragment extends Fragment implements Updateable{
     @Override
     public void onGuestUpdate(){
 
+    }
+
+    @Override
+    public void onDialogPositiveClick(int rideIndex,int windowIndex){
+        Log.v(TAG,"d callback");
     }
 }
