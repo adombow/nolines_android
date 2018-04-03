@@ -6,4 +6,6 @@ package com.nolines.nolines.api.service;
 
 public interface Updateable {
     void onRidesUpdate();
+
+    void onGuestUpdate();
 }

@@ -220,6 +220,11 @@ public class RideFragment extends Fragment implements Updateable, RideWindowDial
     }
 
     @Override
+    public void onGuestUpdate(){
+
+    }
+
+    @Override
     public void onDialogPositiveClick(int rideIndex,int windowIndex){
         Log.v(TAG,"d callback");
     }
