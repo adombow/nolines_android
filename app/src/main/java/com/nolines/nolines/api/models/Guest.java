@@ -31,4 +31,26 @@ public class Guest {
 
     public String getName(){ return this.name; }
     public List<Ticket> getTickets(){ return this.tickets; }
+
+    /**
+     * Gets a list of all of this guest's tickets that are available for the date represented by testDate
+     * @return List of all the tickets with start times set for testDate and an empty
+     * list if none are available.
+     */
+    public List<Ticket> getTicketsForDate(Calendar testDate){
+        List<Ticket> datedTickets = new ArrayList<Ticket>();
+
+        for(Ticket ticket : tickets){
+            //Look through all of the guest's tickets and check if they have any for the selected day
+            if (ticket.getTime() != null) {
+                Calendar ticketDate = ticket.getLocalDatetimeFromTime();
+                if (ticketDate.get(Calendar.YEAR) == testDate.get(Calendar.YEAR) &&
+                        ticketDate.get(Calendar.MONTH) == testDate.get(Calendar.MONTH) &&
+                        ticketDate.get(Calendar.DATE) == testDate.get(Calendar.DATE)) {
+                    datedTickets.add(ticket);
+                }
+            }
+        }
+        return datedTickets;
+    }
 }

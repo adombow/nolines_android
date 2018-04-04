@@ -194,19 +194,7 @@ public class TicketFragment extends Fragment implements Updateable{
     }
 
     private void setupAdapter(){
-        List<Ticket> datedTickets = new ArrayList<Ticket>();
-
-        for(Ticket ticket : mGuest.getGuestObject().getTickets()){
-            //Look through all of the guest's tickets and check if they have any for the selected day
-            if (ticket.getTime() != null) {
-                Calendar ticketDate = ticket.getLocalDatetimeFromTime();
-                if (ticketDate.get(Calendar.YEAR) == calendar.get(Calendar.YEAR) &&
-                        ticketDate.get(Calendar.MONTH) == calendar.get(Calendar.MONTH) &&
-                        ticketDate.get(Calendar.DATE) == calendar.get(Calendar.DATE)) {
-                    datedTickets.add(ticket);
-                }
-            }
-        }
+        List<Ticket> datedTickets = mGuest.getGuestObject().getTicketsForDate(calendar);
         if(datedTickets.isEmpty()){
             recyclerView.setVisibility(View.GONE);
             emptyRecycler.setVisibility(View.VISIBLE);
