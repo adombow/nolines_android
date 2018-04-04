@@ -188,10 +188,9 @@ public class TicketFragment extends Fragment implements Updateable{
     }
 
     private void setupToolbar(){
-        toolbar.setTitle("Tickets");
+        toolbar.setTitle("Reservations");
         ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
         ((MainActivity) getActivity()).setupActionBarDrawerToggle(toolbar);
-        ((MainActivity) getActivity()).getSupportActionBar().setDisplayShowTitleEnabled(true);
     }
 
     private void setupAdapter(){

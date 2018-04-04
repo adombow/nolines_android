@@ -102,26 +102,15 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder
                 //Toast.makeText(mContext, "Position: " + window_position + " " + position, Toast.LENGTH_SHORT).show();
                 Ride ride = mRides.get(position);
 
-//                DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-//                df1.setTimeZone(TimeZone.getTimeZone("UTC"));
-//                Date date;
-//                String formattedDate = "";
-//                try {
-//                    date = df1.parse(ride.getWindowDate());
-//                    formattedDate = DateFormat.getDateInstance(DateFormat.FULL).format(date.getTime());
-//                }
-//                catch(Exception e){}
-
-                DateFormat df = new SimpleDateFormat(Ticket.dateFormat);
-                df.setTimeZone(TimeZone.getTimeZone("UTC"));
-                SimpleDateFormat formatter = new SimpleDateFormat("h:mm a");
-                formatter.setTimeZone(TimeZone.getDefault());
-                String formattedDate;
-                try{
-                    formattedDate = formatter.format(df.parse(ride.getWindowDate()).getTime());
-                } catch (ParseException e) {
-                    formattedDate = "";
+                DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                df1.setTimeZone(TimeZone.getTimeZone("UTC"));
+                Date date;
+                String formattedDate = "";
+                try {
+                    date = df1.parse(ride.getWindowDate());
+                    formattedDate = DateFormat.getDateInstance(DateFormat.FULL).format(date.getTime());
                 }
+                catch(Exception e){}
 
                 RideWindowDialog dialog = RideWindowDialog.newInstance(mFragment,ride, ride.getRideWindows(timeFrame).get(window_position), formattedDate);
                 dialog.show(((Activity) mContext).getFragmentManager() , "NoticeDialogFragment");

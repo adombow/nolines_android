@@ -3,9 +3,9 @@
     <!-- These settings headers are only used on tablets. -->
 
     <header
-        android:fragment="com.nolines.nolines.SettingsActivity$GeneralPreferenceFragment"
+        android:fragment="com.nolines.nolines.SettingsActivity$UserPreferenceFragment"
         android:icon="@drawable/ic_info_black_24dp"
-        android:title="@string/pref_header_general" />
+        android:title="@string/pref_header_user" />
 
     <header
         android:fragment="com.nolines.nolines.SettingsActivity$NotificationPreferenceFragment"
@@ -13,8 +13,8 @@
         android:title="@string/pref_header_notifications" />
 
     <header
-        android:fragment="com.nolines.nolines.SettingsActivity$DataSyncPreferenceFragment"
+        android:fragment="com.nolines.nolines.SettingsActivity$ServerPreferenceFragment"
         android:icon="@drawable/ic_sync_black_24dp"
-        android:title="@string/pref_header_data_sync" />
+        android:title="@string/pref_header_server" />
 
 </preference-headers>
