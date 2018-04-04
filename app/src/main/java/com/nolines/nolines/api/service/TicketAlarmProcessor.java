@@ -228,13 +228,13 @@ public class TicketAlarmProcessor extends IntentService {
         if(timeUntilStart > 60){
             ticketProcessorReceiver.putExtra(NOTIFICATION_TYPE, NotificationType.OPEN);
             PendingIntent pendingIntent = PendingIntent.getBroadcast(context,
-                    ticket.hashCode(), ticketProcessorReceiver, 0);
+                    getNotificationID(ticket.getId(), 0), ticketProcessorReceiver, 0);
             alarmManager.set(AlarmManager.RTC_WAKEUP, startTime * 1000, pendingIntent);
 
             if(timeUntilStart > TicketAlarmProcessor.timeToAlert) {
                 ticketProcessorReceiver.putExtra(NOTIFICATION_TYPE, NotificationType.PRE_OPEN);
                 pendingIntent = PendingIntent.getBroadcast(context,
-                        ticket.hashCode() + 1, ticketProcessorReceiver, 0);
+                        getNotificationID(ticket.getId(), 1), ticketProcessorReceiver, 0);
                 alarmManager.set(AlarmManager.RTC_WAKEUP, (startTime - TicketAlarmProcessor.timeToAlert) * 1000, pendingIntent);
             }
         }
@@ -245,16 +245,30 @@ public class TicketAlarmProcessor extends IntentService {
         if(timeUntilEnd > 60) {
             ticketProcessorReceiver.putExtra(NOTIFICATION_TYPE, NotificationType.CLOSE);
             PendingIntent pendingIntent = PendingIntent.getBroadcast(context,
-                    ticket.hashCode() + 2, ticketProcessorReceiver, 0);
+                    getNotificationID(ticket.getId(), 2), ticketProcessorReceiver, 0);
             alarmManager.set(AlarmManager.RTC_WAKEUP, endTime * 1000, pendingIntent);
 
             if (timeUntilEnd > TicketAlarmProcessor.timeToAlert) {
                 ticketProcessorReceiver.putExtra(NOTIFICATION_TYPE, NotificationType.PRE_CLOSE);
                 pendingIntent = PendingIntent.getBroadcast(context,
-                        ticket.hashCode() + 3, ticketProcessorReceiver, 0);
+                        getNotificationID(ticket.getId(), 3), ticketProcessorReceiver, 0);
                 alarmManager.set(AlarmManager.RTC_WAKEUP, (endTime - TicketAlarmProcessor.timeToAlert) * 1000, pendingIntent);
             }
         }
+    }
+
+    /**
+     * Gets a unique number result from a pair of numbers.  Result is only the same if
+     * the number pair of a and b is exactly the same, including ordering.
+     * @param a the first number
+     * @param b the second number
+     * @return A unique number only obtainable if the
+     * same 2 numbers are input again in the same order
+     */
+    public static int getNotificationID(int a, int b){
+        //Cantor pairing function to get unique number from a number pair
+        //returns different results for each ordering (i.e. a,b or b,a)
+        return ((a+b)*(a+b+1))/2+b;
     }
 }
 
