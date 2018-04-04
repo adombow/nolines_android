@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.nolines.nolines.adapters.HomeCardAdapter;
 import com.nolines.nolines.api.models.GuestHolder;
+import com.nolines.nolines.api.models.Ticket;
 import com.nolines.nolines.api.service.Updateable;
 import com.nolines.nolines.dummy.DummyContent;
 import com.nolines.nolines.dummy.DummyContent.DummyItem;
@@ -136,6 +137,12 @@ public class HomeFragment extends Fragment implements Updateable{
             mAdapter.updateHomeCardList(list);
         }
     }
+
+    @Override
+    public void onTicketCreated(Ticket ticket, int status_code){
+
+    }
+
 
     /**
      * This interface must be implemented by activities that contain this

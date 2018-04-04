@@ -1,9 +1,9 @@
 package com.nolines.nolines;
 
-import android.app.Activity;
+import butterknife.ButterKnife;
+
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
@@ -12,8 +12,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.nolines.nolines.api.models.Ride;
-import com.nolines.nolines.api.models.RideWindow;
+import com.nolines.nolines.api.models.Ticket;
 import com.squareup.picasso.Picasso;
 
 import java.text.DateFormat;
@@ -22,52 +21,42 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
 
-/**
- * Created by Timothy Leung on 4/1/2018.
- */
 
-public class RideWindowDialog extends DialogFragment {
-    @BindView(R.id.button1) Button reserveButton;
+public class TicketCreatedDialog extends DialogFragment {
+    @BindView(R.id.button1) Button myTicketButton;
     @BindView(R.id.button2) Button cancelButton;
     @BindView(R.id.title) TextView title;
     @BindView(R.id.subtitle) TextView subtitle;
     @BindView(R.id.details) TextView details;
     @BindView(R.id.card_image) ImageView rideImage;
 
-    private String window_id;
-
-    public String getWindow_id() {
-        return window_id;
+    public interface TicketCreatedDialogListener {
+        void onGoToTickets();
     }
 
-    public interface RideWindowDialogListener {
-        void onDialogPositiveClick(String window_id);
-    }
+    TicketCreatedDialogListener mListener;
 
-    RideWindowDialogListener mListener;
-
-    public static RideWindowDialog newInstance(RideWindowDialogListener mListener, Ride ride, RideWindow rideWindow, String mDate){
-        RideWindowDialog dialog = new RideWindowDialog();
+    public static TicketCreatedDialog newInstance(TicketCreatedDialogListener mListener, Ticket ticket, String title){
+        TicketCreatedDialog dialog = new TicketCreatedDialog();
         dialog.mListener = mListener;
 
         Bundle args = new Bundle();
-        args.putString("ride_name",ride.getName());
+        args.putString("ride_name",ticket.getRide().getName());
 
         DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         df1.setTimeZone(TimeZone.getTimeZone("UTC"));
-        Date date;
+        Date windowTime;
+
         try {
-            date = df1.parse(ride.getWindowDate());
-            args.putString("window_time",DateFormat.getTimeInstance(DateFormat.SHORT).format(date.getTime()));
+            windowTime = df1.parse(ticket.getTime());
+            args.putString("date",DateFormat.getDateInstance(DateFormat.FULL).format(windowTime.getTime()));
+        }
+        catch(Exception e){
 
         }
-        catch(Exception e){}
-
-        args.putString("date",mDate);
-        args.putString("window_id",rideWindow.getIdString());
-        args.putString("image_url",ride.getPhotoURL());
+        args.putString("title",title);
+        args.putString("image_url",ticket.getRide().getPhotoURL());
 
         dialog.setArguments(args);
         return dialog;
@@ -86,27 +75,28 @@ public class RideWindowDialog extends DialogFragment {
 
         Bundle args = getArguments();
 
-        this.title.setText(args.getString("ride_name"));
-        this.subtitle.setText(args.getString("date"));
-        this.details.setText(args.getString("window_time"));
-        this.window_id = args.getString("window_id");
+        this.title.setText(args.getString("title"));
+        this.subtitle.setText(args.getString("ride_name"));
+        this.details.setText(args.getString("date"));
         Picasso.get().load(args.getString("image_url")).into(this.rideImage);
 
         builder.setView(view);
 
+        cancelButton.setText(R.string.btn_dismiss);
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //mListener.onDialogNegativeClick((RideWindowDialog) getParentFragment());
+
                 getDialog().dismiss();
             }
         });
 
-        reserveButton.setOnClickListener(new View.OnClickListener() {
+        myTicketButton.setText(R.string.btn_my_tickets);
+        myTicketButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 getDialog().dismiss();
-                mListener.onDialogPositiveClick(window_id);
+                mListener.onGoToTickets();
             }
         });
 

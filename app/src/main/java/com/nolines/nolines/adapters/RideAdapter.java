@@ -29,6 +29,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.TimeZone;
 
 import butterknife.BindView;
@@ -94,6 +95,9 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder
             formattedDate = DateFormat.getDateInstance(DateFormat.FULL).format(date.getTime());
         }
         catch(Exception e){}
+
+
+
         holder.details.setText(formattedDate);
 
         RecyclerViewClickListener recyclerViewClickListener = new RecyclerViewClickListener() {
@@ -108,7 +112,7 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder
                 String formattedDate = "";
                 try {
                     date = df1.parse(ride.getWindowDate());
-                    formattedDate = DateFormat.getDateInstance(DateFormat.FULL).format(date.getTime());
+                    formattedDate = DateFormat.getDateInstance(DateFormat.FULL, Locale.CANADA).format(date.getTime());
                 }
                 catch(Exception e){}
 
@@ -117,7 +121,9 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder
             }
         };
 
-        if(ride.getRideWindows(timeFrame) != null){
+        if(ride.getRideWindows(timeFrame) != null && !ride.getRideWindows(timeFrame).isEmpty()){
+            holder.emptyRecyclerTextView.setVisibility(View.GONE);
+            holder.windowRecyclerView.setVisibility(View.VISIBLE);
             holder.rideWindowAdapter = new RideWindowAdapter(ride.getRideWindows(timeFrame), recyclerViewClickListener);
             holder.windowRecyclerView.setRecycledViewPool(viewPool);
             holder.windowRecyclerView.setAdapter(holder.rideWindowAdapter);
@@ -126,6 +132,10 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder
             mLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
 
             holder.windowRecyclerView.setLayoutManager(mLayoutManager);
+        }
+        else {
+            holder.windowRecyclerView.setVisibility(View.GONE);
+            holder.emptyRecyclerTextView.setVisibility(View.VISIBLE);
         }
     }
 
@@ -147,6 +157,7 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder
         @BindView(R.id.details) TextView details;
         @BindView(R.id.card_image) ImageView rideImage;
         @BindView(R.id.window_recycler_view) RecyclerView windowRecyclerView;
+        @BindView(R.id.emptyRecyclerTextView) TextView emptyRecyclerTextView;
 
         RideWindowAdapter rideWindowAdapter;
 

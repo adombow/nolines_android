@@ -24,19 +24,19 @@
             android:orientation="vertical">
             <ImageView
                 android:layout_width="match_parent"
-                android:layout_height="160dp"
+                android:layout_height="100dp"
                 android:scaleType="centerCrop"
-                android:src="@drawable/alps_small" />
+                android:src="@drawable/map_header" />
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="10dp">
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
-                    android:text="NoLines Reservations Available"
+                    android:text="@string/notification_title_generic"
                     android:textColor="#000"
                     android:textSize="18sp"
                     android:id="@+id/title"
@@ -47,11 +47,16 @@
                     android:text="Card Text"
                     android:textColor="#555" />
             </LinearLayout>
+
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="match_parent"
+                android:layout_gravity="right"
+                android:gravity="right">
+
                 <Button
                     android:id="@+id/welcome_card_button"
+                    style="@style/Widget.AppCompat.Button.Borderless"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Start Now" />

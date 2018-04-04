@@ -128,7 +128,7 @@ public class MainActivity extends AppCompatActivity
 
         if(fragment != null){
             FragmentManager fragmentManager = getSupportFragmentManager();
-            fragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit();
+            fragmentManager.beginTransaction().addToBackStack(null).replace(R.id.fragment_container, fragment).commit();
         }
 
         if (drawer.isDrawerOpen(GravityCompat.START)) {

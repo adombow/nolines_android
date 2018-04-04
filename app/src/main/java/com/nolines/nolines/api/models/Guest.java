@@ -15,7 +15,7 @@ public class Guest {
 
     private int id;
     private String name;
-    private ArrayList<Ticket> tickets;
+    private List<Ticket> tickets;
 
     public Guest(String name) {
         this.name = name;
@@ -30,5 +30,12 @@ public class Guest {
     }
 
     public String getName(){ return this.name; }
-    public List<Ticket> getTickets(){ return this.tickets; }
+    public List<Ticket> getTickets(){
+
+        if(tickets == null){
+            tickets = new ArrayList<>();
+        }
+
+        return tickets;
+    }
 }

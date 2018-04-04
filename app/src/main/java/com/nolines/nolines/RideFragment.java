@@ -1,16 +1,16 @@
 package com.nolines.nolines;
 
+import android.app.Activity;
 import android.app.DatePickerDialog;
-import android.app.DialogFragment;
 import android.content.Context;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -18,14 +18,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.DatePicker;
-import android.widget.TextView;
 
 import com.nolines.nolines.adapters.RideAdapter;
 import com.nolines.nolines.api.models.Ride;
 import com.nolines.nolines.api.models.RidesHolder;
+import com.nolines.nolines.api.models.Ticket;
 import com.nolines.nolines.api.service.Updateable;
 
-import java.text.DateFormat;
 import java.util.Calendar;
 
 import butterknife.BindView;
@@ -37,7 +36,7 @@ import butterknife.ButterKnife;
  * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
  * interface.
  */
-public class RideFragment extends Fragment implements Updateable, RideWindowDialog.RideWindowDialogListener{
+public class RideFragment extends Fragment implements Updateable, RideWindowDialog.RideWindowDialogListener, TicketCreatedDialog.TicketCreatedDialogListener {
     private static final String TAG = "RideFragment";
     private static final String ARG_COLUMN_COUNT = "column-count";
 
@@ -46,9 +45,14 @@ public class RideFragment extends Fragment implements Updateable, RideWindowDial
     private RideAdapter mAdapter;
     private RidesHolder rides;
 
-    @BindView(R.id.recyclerView) RecyclerView recyclerView;
-    @BindView(R.id.toolbar) Toolbar toolbar;
-    @BindView(R.id.window_tabs) TabLayout tabLayout;
+    @BindView(R.id.recyclerView)
+    RecyclerView recyclerView;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+    @BindView(R.id.window_tabs)
+    TabLayout tabLayout;
+    @BindView(R.id.swiperefresh)
+    SwipeRefreshLayout swipeRefreshLayout;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -70,7 +74,6 @@ public class RideFragment extends Fragment implements Updateable, RideWindowDial
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         getRides();
     }
 
@@ -81,6 +84,7 @@ public class RideFragment extends Fragment implements Updateable, RideWindowDial
 
         ButterKnife.bind(this, view);
 
+        setupRefreshLayout();
         setupToolbar();
         setupTabs();
 
@@ -105,10 +109,8 @@ public class RideFragment extends Fragment implements Updateable, RideWindowDial
                         rides.calendar.set(Calendar.YEAR, year);
                         rides.calendar.set(Calendar.MONTH, monthOfYear);
                         rides.calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                        String date = DateFormat.getDateInstance(DateFormat.FULL).format( rides.calendar.getTime());
-                        getRides();
-                        //mAdapter.setDate(date);
-                        //mAdapter.notifyDataSetChanged();
+                        swipeRefreshLayout.setRefreshing(true);
+                        rides.refreshRides();
                     }
                 }, rides.calendar.get(Calendar.YEAR), rides.calendar.get(Calendar.MONTH), rides.calendar.get(Calendar.DAY_OF_MONTH));
                 datePickerDialog.getDatePicker().setCalendarViewShown(false);
@@ -137,7 +139,7 @@ public class RideFragment extends Fragment implements Updateable, RideWindowDial
     }
 
     @Override
-    public void onDestroy(){
+    public void onDestroy() {
         super.onDestroy();
         rides.unregisterListener(this);
     }
@@ -163,37 +165,39 @@ public class RideFragment extends Fragment implements Updateable, RideWindowDial
         rides.refreshRides();
     }
 
+
     @Override
-    public void onRidesUpdate(){
-        if(mAdapter == null){
-            mAdapter = new RideAdapter(rides.getRideList(),this.getContext(),this);
+    public void onRidesUpdate() {
+        if (mAdapter == null) {
+            mAdapter = new RideAdapter(rides.getRideList(), this.getContext(), this);
             recyclerView.setAdapter(mAdapter);
-        }
-        else{
+        } else {
             mAdapter.updateRideList(rides.getRideList());
         }
+
+        swipeRefreshLayout.setRefreshing(false);
     }
 
-    private void setupToolbar(){
+    private void setupToolbar() {
         toolbar.setTitle("Reservations");
-        ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
         ((MainActivity) getActivity()).setupActionBarDrawerToggle(toolbar);
     }
 
-    private void setupTabs(){
-        tabLayout.addTab(tabLayout.newTab().setText("Morning"));
-        tabLayout.addTab(tabLayout.newTab().setText("Afternoon"));
-        tabLayout.addTab(tabLayout.newTab().setText("Evening"));
+    private void setupTabs() {
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.morning));
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.afternoon));
+        tabLayout.addTab(tabLayout.newTab().setText(R.string.evening));
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
 
-                if(mAdapter == null)
+                if (mAdapter == null)
                     return;
 
                 int position = tab.getPosition();
 
-                switch(position){
+                switch (position) {
                     case 0:
                         mAdapter.setTimeFrame(Ride.MORNING);
                         break;
@@ -220,13 +224,64 @@ public class RideFragment extends Fragment implements Updateable, RideWindowDial
         });
     }
 
+    private void setupRefreshLayout() {
+        swipeRefreshLayout.setRefreshing(true);
+
+        swipeRefreshLayout.setOnRefreshListener(
+                new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        rides.refreshRides();
+                    }
+                }
+        );
+    }
+
     @Override
-    public void onGuestUpdate(){
+    public void onGuestUpdate() {
 
     }
 
     @Override
-    public void onDialogPositiveClick(int rideIndex,int windowIndex){
-        Log.v(TAG,"d callback");
+    public void onTicketCreated(Ticket ticket, int status_code) {
+
+        if(status_code == 200){
+            TicketCreatedDialog dialog = TicketCreatedDialog.newInstance(this, ticket, getString(R.string.header_reservation_made));
+            dialog.show(((Activity) this.getContext()).getFragmentManager(), "TicketCreated");
+        }
+        else {
+            TicketErrorDialog dialog = new TicketErrorDialog();
+            dialog.show(((Activity) this.getContext()).getFragmentManager(), "TicketError");
+
+        }
+
+        swipeRefreshLayout.setRefreshing(true);
+        rides.refreshRides();
+    }
+
+    //Ticket Dialog
+    @Override
+    public void onGoToTickets() {
+        Fragment fragment = null;
+        Class fragmentClass = TicketFragment.class;
+
+        if(fragmentClass != null){
+            try {
+                fragment = (Fragment) fragmentClass.newInstance();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        if(fragment != null){
+            FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+            fragmentManager.beginTransaction().addToBackStack(null).replace(R.id.fragment_container, fragment).commit();
+        }
+    }
+
+    //Ride Window
+    @Override
+    public void onDialogPositiveClick(String window_id) {
+        rides.requestTicket(window_id, "1");
     }
 }

@@ -13,7 +13,7 @@
     <string name="drawer_home">Home</string>
     <string name="drawer_map">Park Map</string>
     <string name="drawer_ticket_select">Make a Reservation</string>
-    <string name="drawer_AR">ARActivity</string>
+    <string name="drawer_AR">AR Map</string>
     <string name="settings">Settings</string>
     <string name="view_tickets">View Tickets</string>
 
@@ -89,5 +89,18 @@
         <item quantity="one">Your ride window closes in %1$d minute!</item>
         <item quantity="many">Your ride window closes in %1$d minutes!</item>
     </plurals>
+
+
     <string name="window_close">Your ride window is now closed!</string>
+    <string name="no_windows_text">No reservations available.</string>
+    <string name="afternoon">Afternoon</string>
+    <string name="morning">Morning</string>
+    <string name="evening">Evening</string>
+    <string name="menu_refresh">Refresh</string>
+    <string name="btn_dismiss">Dismiss</string>
+    <string name="btn_my_tickets">My Tickets</string>
+    <string name="header_reservation_sucessful">Reservation Successful</string>
+    <string name="header_reservation_made">Reservation Made</string>
+    <string name="header_no_longer_avaliable">The reservation you requested is no longer available.</string>
+    <string name="cancel">CANCEL</string>
 </resources>

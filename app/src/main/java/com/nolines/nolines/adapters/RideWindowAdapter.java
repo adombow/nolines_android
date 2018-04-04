@@ -53,13 +53,11 @@ public class RideWindowAdapter extends RecyclerView.Adapter<RideWindowAdapter.Ri
 
         DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         df1.setTimeZone(TimeZone.getTimeZone("UTC"));
-        SimpleDateFormat formatter = new SimpleDateFormat("h:mm a");
-        formatter.setTimeZone(TimeZone.getDefault());
         Date date;
 
         try {
-           date = df1.parse(rideWindow.getStartTime());
-           holder.button1.setText(formatter.format(date));
+            date = df1.parse(rideWindow.getStartTime());
+           holder.button1.setText(DateFormat.getTimeInstance(DateFormat.SHORT).format(date.getTime()));
         }
         catch(Exception e){
 
