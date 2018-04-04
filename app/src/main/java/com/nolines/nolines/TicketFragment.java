@@ -4,9 +4,13 @@ import android.app.DatePickerDialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -15,22 +19,19 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.DatePicker;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.nolines.nolines.adapters.TicketAdapter;
 import com.nolines.nolines.api.models.GuestHolder;
 import com.nolines.nolines.api.models.Ticket;
 import com.nolines.nolines.api.service.Updateable;
+import com.nolines.nolines.helpers.RecyclerItemTouchHelper;
 
 import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -41,7 +42,7 @@ import butterknife.ButterKnife;
  * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
  * interface.
  */
-public class TicketFragment extends Fragment implements Updateable{
+public class TicketFragment extends Fragment implements Updateable, RecyclerItemTouchHelper.RecyclerItemTouchHelperListener{
     private static final String TAG = "TicketFragment";
     private static final String ARG_COLUMN_COUNT = "column-count";
 
@@ -55,6 +56,7 @@ public class TicketFragment extends Fragment implements Updateable{
     @BindView(R.id.recyclerView) RecyclerView recyclerView;
     @BindView(R.id.toolbar) Toolbar toolbar;
     @BindView(R.id.empty_recyclerview) TextView emptyRecycler;
+    @BindView(R.id.swiperefresh) SwipeRefreshLayout swipeRefreshLayout;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -89,8 +91,16 @@ public class TicketFragment extends Fragment implements Updateable{
 
         ButterKnife.bind(this, view);
 
+        setupRefreshLayout();
         setupToolbar();
         setHasOptionsMenu(true);
+
+
+        LinearLayoutManager layoutManager= new LinearLayoutManager(getActivity());
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(),
+                layoutManager.getOrientation());
+        recyclerView.addItemDecoration(dividerItemDecoration);
+
 
         return view;
     }
@@ -145,6 +155,12 @@ public class TicketFragment extends Fragment implements Updateable{
     }
 
     @Override
+    public void onPause(){
+        super.onPause();
+        mGuest.unregisterListener(this);
+    }
+
+    @Override
     public void onDestroy(){
         super.onDestroy();
         mGuest.unregisterListener(this);
@@ -174,6 +190,12 @@ public class TicketFragment extends Fragment implements Updateable{
     public void onRidesUpdate(){
     }
 
+
+    @Override
+    public void onTicketCreated(Ticket ticket, int status_code){
+
+    }
+
     @Override
     public void onGuestUpdate(){
         if(mGuest.getGuestObject().getTickets().isEmpty()){
@@ -184,10 +206,14 @@ public class TicketFragment extends Fragment implements Updateable{
             emptyRecycler.setVisibility(View.GONE);
             mAdapter = new TicketAdapter(mGuest.getGuestObject().getTickets(), mListener, this.getContext());
             recyclerView.setAdapter(mAdapter);
+            ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new RecyclerItemTouchHelper(0, ItemTouchHelper.LEFT,this);
+            new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerView);
         }
+        swipeRefreshLayout.setRefreshing(false);
     }
 
     private void setupToolbar(){
+        toolbar.setTitle("Your Reservations");
         toolbar.setTitle("Reservations");
         ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
         ((MainActivity) getActivity()).setupActionBarDrawerToggle(toolbar);
@@ -203,6 +229,34 @@ public class TicketFragment extends Fragment implements Updateable{
             emptyRecycler.setVisibility(View.GONE);
             mAdapter = new TicketAdapter(datedTickets, mListener, this.getContext());
             recyclerView.setAdapter(mAdapter);
+            ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new RecyclerItemTouchHelper(0, ItemTouchHelper.LEFT,this);
+            new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerView);
+        }
+    }
+
+    private void setupRefreshLayout(){
+        swipeRefreshLayout.setRefreshing(true);
+
+        swipeRefreshLayout.setOnRefreshListener(
+                new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        mGuest.refreshGuest();
+                    }
+                }
+        );
+    }
+
+    /**
+     * Swipe Callback
+     */
+    @Override
+    public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction, int position) {
+        if (viewHolder instanceof TicketAdapter.TicketViewHolder) {
+            int ticket_id = mAdapter.getItem(viewHolder.getAdapterPosition()).getId();
+            mAdapter.removeItem(viewHolder.getAdapterPosition());
+            mGuest.cancelTicket(ticket_id);
+            swipeRefreshLayout.setRefreshing(true);
         }
     }
 }

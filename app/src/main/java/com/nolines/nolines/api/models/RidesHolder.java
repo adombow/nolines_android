@@ -51,12 +51,35 @@ public class RidesHolder {
     private List<Ride> rides;
     private static WeakReference<Context> mContext;
 
+    private Retrofit.Builder builder;
+    private Retrofit retrofit;
+    private NoLinesClient client;
+
     private RidesHolder() {
         calendar = Calendar.getInstance();
         calendar.set(Calendar.HOUR_OF_DAY, 16);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext.get());
+
+        Retrofit.Builder builder;
+        try{
+            builder = new Retrofit.Builder()
+                    .baseUrl(prefs.getString(mContext.get().getString(R.string.pref_key_server_url),
+                            mContext.get().getString(R.string.pref_server_url_remote)))
+                    .addConverterFactory(GsonConverterFactory.create());
+        } catch(IllegalArgumentException e) {
+            builder = new Retrofit.Builder()
+                    .baseUrl(mContext.get().getString(R.string.pref_server_url_remote))
+                    .addConverterFactory(GsonConverterFactory.create());
+        }
+
+        Retrofit retrofit = builder.build();
+
+        client = retrofit.create(NoLinesClient.class);
+
         getRides();
     }
 
@@ -73,24 +96,6 @@ public class RidesHolder {
     public List<Ride> getRideList(){ return rides;}
 
     private void getRides(){
-
-        SharedPreferences prefs =  PreferenceManager.getDefaultSharedPreferences(mContext.get());
-
-        Retrofit.Builder builder;
-        try{
-            builder = new Retrofit.Builder()
-                    .baseUrl(prefs.getString(mContext.get().getString(R.string.pref_key_server_url),
-                            mContext.get().getString(R.string.pref_server_url_remote)))
-                    .addConverterFactory(GsonConverterFactory.create());
-        } catch(IllegalArgumentException e){
-            builder = new Retrofit.Builder()
-                    .baseUrl(mContext.get().getString(R.string.pref_server_url_remote))
-                    .addConverterFactory(GsonConverterFactory.create());
-        }
-
-        Retrofit retrofit = builder.build();
-
-        NoLinesClient client = retrofit.create(NoLinesClient.class);
 
         DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
         //df1.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -114,6 +119,36 @@ public class RidesHolder {
 
             @Override
             public void onFailure(Call<List<Ride>> call, Throwable t) {
+                Toast.makeText(mContext.get(),"Network Error",Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    public void requestTicket(String window_id, String guest_id){
+
+        DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
+        String requestDate = df1.format(calendar.getTime());
+
+        TicketRequest ticketRequest= new TicketRequest(window_id,guest_id,requestDate);
+        Call<Ticket> call = client.requestTicket(ticketRequest);
+
+        call.enqueue(new Callback<Ticket>() {
+            @Override
+            public void onResponse(Call<Ticket> call, Response<Ticket> response) {
+                Log.i(TAG, "Response Received");
+                Ticket ticket = response.body();
+
+
+                for(Updateable listener : listeners){
+                    try{
+                        listener.onTicketCreated(ticket,response.raw().code());
+                    } catch(Throwable t){
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Ticket> call, Throwable t) {
                 Toast.makeText(mContext.get(),"Network Error",Toast.LENGTH_SHORT).show();
             }
         });

@@ -55,7 +55,6 @@ import com.squareup.picasso.Picasso;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 import java.util.TimeZone;
 
 import butterknife.BindView;
@@ -206,6 +205,9 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
     @Override
     public void onPause() {
         super.onPause();
+
+        guest.unregisterListener(this);
+        rides.unregisterListener(this);
 
         //stop location updates when Activity is no longer active
         if (mFusedLocationClient != null) {
@@ -372,6 +374,12 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
         //Start fetching the rides to display
         rides.refreshRides();
     }
+
+    @Override
+    public void onTicketCreated(Ticket ticket, int status_code){
+
+    }
+
 
     @Override
     public void onDetach() {

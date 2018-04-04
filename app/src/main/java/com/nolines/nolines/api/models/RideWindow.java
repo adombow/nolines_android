@@ -19,6 +19,12 @@ public class RideWindow {
         return id;
     }
 
+    public String getIdString(){
+        String s = Integer.toString(id);
+
+        return s;
+    }
+
     public String getStartTime() {
         return startTime;
     }

@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -128,7 +129,7 @@ public class MainActivity extends AppCompatActivity
 
         if(fragment != null){
             FragmentManager fragmentManager = getSupportFragmentManager();
-            fragmentManager.beginTransaction().replace(R.id.fragment_container, fragment).commit();
+            fragmentManager.beginTransaction().addToBackStack(null).replace(R.id.fragment_container, fragment).commit();
         }
 
         if (drawer.isDrawerOpen(GravityCompat.START)) {
@@ -141,7 +142,12 @@ public class MainActivity extends AppCompatActivity
     public void onListFragmentInteraction(Ride ride){}
 
     @Override
-    public void onListFragmentInteraction(DummyContent.DummyItem item){}
+    public void onReservationHeaderClicked(){
+        try {
+            replaceFragmentWithAnimation(TicketFragment.class.newInstance(), "TicketFragment");
+        }
+        catch(Exception e){e.printStackTrace();}
+    }
 
     @Override
     public void onListFragmentInteraction(Ticket ticket){
@@ -164,4 +170,12 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onFragmentInteraction(Uri uri){}
+
+    public void replaceFragmentWithAnimation(android.support.v4.app.Fragment fragment, String tag){
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.setCustomAnimations(R.animator.enter_from_right, R.animator.exit_to_left, R.animator.enter_from_left, R.animator.exit_to_right);
+        transaction.replace(R.id.fragment_container, fragment);
+        transaction.addToBackStack(tag);
+        transaction.commit();
+    }
 }

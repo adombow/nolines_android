@@ -64,10 +64,23 @@
             android:layout_toLeftOf="@id/card_image"
             android:orientation="horizontal"
             android:scrollbars="horizontal"
-            tools:listitem="@layout/fragment_ticket">
+            tools:listitem="@layout/fragment_ride_window">
 
 
         </android.support.v7.widget.RecyclerView>
+
+        <android.widget.TextView
+            android:id="@+id/emptyRecyclerTextView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/view_card_main3_line"
+            android:layout_toLeftOf="@id/card_image"
+            android:gravity="center"
+            android:text="@string/no_windows_text"
+            android:visibility="gone"
+            >
+        </android.widget.TextView>
+
 
         <!--
         <LinearLayout
@@ -107,7 +120,7 @@
 
         <ImageView
             android:id="@+id/card_image"
-            android:layout_width="96dp"
+            android:layout_width="115dp"
             android:layout_height="match_parent"
             android:layout_alignParentEnd="true"
             android:background="@drawable/alps_small"

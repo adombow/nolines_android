@@ -41,16 +41,9 @@ public class GuestHolder {
     private Guest guest;
     private static WeakReference<Context> mContext;
 
-    private GuestHolder() { getGuest(); }
-    public static GuestHolder getInstance(Context context) {
-        mContext = new WeakReference<Context>(context);
-        return Holder.INSTANCE;
-    }
+    private NoLinesClient client;
 
-    public Guest getGuestObject() { return this.guest; }
-    public void refreshGuest() { getGuest(); }
-
-    private void getGuest(){
+    private GuestHolder() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext.get());
 
         Retrofit.Builder builder;
@@ -67,10 +60,21 @@ public class GuestHolder {
 
         Retrofit retrofit = builder.build();
 
-        NoLinesClient client = retrofit.create(NoLinesClient.class);
+        client = retrofit.create(NoLinesClient.class);
+    }
 
-        Call<Guest> call = client.getGuest(Integer.parseInt(prefs.getString(mContext.get().
-                getString(R.string.pref_key_user_id), "1")));
+    public static GuestHolder getInstance(Context context) {
+        mContext = new WeakReference<Context>(context);
+        return Holder.INSTANCE;
+    }
+
+    public Guest getGuestObject() { return this.guest; }
+    public void refreshGuest() { getGuest(); }
+
+    private void getGuest(){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext.get());
+
+        Call<Guest> call = client.getGuest(Integer.parseInt(prefs.getString(mContext.get().getString(R.string.pref_key_user_id), "0")));
 
         call.enqueue(new Callback<Guest>() {
             @Override
@@ -87,6 +91,27 @@ public class GuestHolder {
 
             @Override
             public void onFailure(Call<Guest> call, Throwable t) {
+                Toast.makeText(mContext.get(),"Network Error",Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    public void cancelTicket(int ticket_id){
+
+        Call<Void> call = client.cancelTicket(ticket_id);
+
+
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                Log.i(TAG, "Response Received");
+                if(response.raw().code() == 200){
+                    getGuest();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
                 Toast.makeText(mContext.get(),"Network Error",Toast.LENGTH_SHORT).show();
             }
         });

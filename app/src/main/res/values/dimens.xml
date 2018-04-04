@@ -3,7 +3,7 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="nav_header_vertical_spacing">8dp</dimen>
-    <dimen name="nav_header_height">176dp</dimen>
+    <dimen name="nav_header_height">100dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="text_margin">16dp</dimen>
 
@@ -17,4 +17,5 @@
     <dimen name="card_title_margin">16dp</dimen>
     <dimen name="card_subtitle_margin">16dp</dimen>
     <dimen name="card_button_margin">8dp</dimen>
+    <dimen name="ic_delete">30dp</dimen>
 </resources>

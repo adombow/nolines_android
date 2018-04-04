@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.nolines.nolines.R;
@@ -85,12 +86,22 @@ public class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.TicketView
         return mTickets.size();
     }
 
+    public Ticket getItem(int position){
+        return mTickets.get(position);
+    }
+
+    public void removeItem(int position) {
+        mTickets.remove(position);
+        notifyItemRemoved(position);
+    }
+
     public class TicketViewHolder extends RecyclerView.ViewHolder {
-        @BindView(R.id.card) CardView cv;
+
+        public @BindView(R.id.view_background) RelativeLayout background;
+        public @BindView(R.id.card) CardView cv;
         @BindView(R.id.title) TextView title;
         @BindView(R.id.details) TextView details;
         @BindView(R.id.rideWindow) TextView rideWindow;
-
         @BindView(R.id.card_image) ImageView rideImage;
 
         public TicketViewHolder(View view) {

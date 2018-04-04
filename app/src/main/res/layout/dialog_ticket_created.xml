@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/main_card_margin_vertical"
+    android:layout_marginStart="@dimen/main_card_margin_horizontal"
+    android:layout_marginEnd="@dimen/main_card_margin_horizontal"
+    >
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="170dp"
+            android:foreground="?attr/selectableItemBackground">
+
+                <TextView
+                    android:id="@+id/title"
+                    style="@style/TextAppearance.AppCompat.Large"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/card_title_margin"
+                    android:layout_marginStart="@dimen/card_title_margin"
+                    android:layout_marginTop="@dimen/card_title_margin"
+                    android:text="Title"
+                    android:textColor="@color/black" />
+
+                <TextView
+                    android:id="@+id/subtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/title"
+                    android:layout_marginEnd="@dimen/card_subtitle_margin"
+                    android:layout_marginStart="@dimen/card_subtitle_margin"
+                    android:layout_marginTop="@dimen/card_button_margin"
+                    android:text="Subtitle" />
+
+                <TextView
+                    android:id="@+id/details"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/subtitle"
+                    android:layout_marginEnd="@dimen/card_subtitle_margin"
+                    android:layout_marginStart="@dimen/card_subtitle_margin"
+                    android:layout_marginTop="@dimen/card_button_margin"
+                    android:text="Details"
+                    android:textColor="@color/gray_deep" />
+
+                <View
+                    android:id="@+id/view_card_main3_line"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_below="@id/details"
+                    android:layout_marginTop="@dimen/card_title_margin"
+                    android:background="@color/gray_light" />
+
+
+                <LinearLayout
+                    android:id="@+id/ll_card_main3_rate"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_below="@id/view_card_main3_line"
+                    android:layout_toLeftOf="@id/card_image"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:orientation="horizontal"
+                    android:paddingEnd="@dimen/card_title_margin"
+                    android:paddingStart="@dimen/card_title_margin">
+
+
+                        <Button
+                            android:id="@+id/button1"
+                            style="@style/Widget.AppCompat.Button.Borderless"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="match_parent"
+                            android:text="Reserve"
+                            android:textColor="@color/black" />
+
+                        <Button
+                            android:id="@+id/button2"
+                            style="@style/Widget.AppCompat.Button.Borderless"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="match_parent"
+                            android:text="Cancel"
+                            android:textColor="@color/black" />
+
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/card_image"
+                    android:layout_width="150dp"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentEnd="true"
+                    android:background="@color/app_blue"
+                    android:scaleType="fitXY" />
+
+        </RelativeLayout>
+</LinearLayout>
