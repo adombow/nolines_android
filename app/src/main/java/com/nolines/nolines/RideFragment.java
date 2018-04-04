@@ -3,7 +3,9 @@ package com.nolines.nolines;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -20,6 +22,7 @@ import android.view.ViewGroup;
 import android.widget.DatePicker;
 
 import com.nolines.nolines.adapters.RideAdapter;
+import com.nolines.nolines.api.models.Guest;
 import com.nolines.nolines.api.models.Ride;
 import com.nolines.nolines.api.models.RidesHolder;
 import com.nolines.nolines.api.models.Ticket;
@@ -29,6 +32,7 @@ import java.util.Calendar;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import retrofit2.Call;
 
 /**
  * A fragment representing a list of Items.
@@ -133,9 +137,16 @@ public class RideFragment extends Fragment implements Updateable, RideWindowDial
     }
 
     @Override
+    public void onPause(){
+        super.onPause();
+        rides.unregisterListener(this);
+    }
+
+    @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
+        rides.unregisterListener(this);
     }
 
     @Override
@@ -282,6 +293,8 @@ public class RideFragment extends Fragment implements Updateable, RideWindowDial
     //Ride Window
     @Override
     public void onDialogPositiveClick(String window_id) {
-        rides.requestTicket(window_id, "1");
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
+        String guest_id = prefs.getString(getContext().getString(R.string.pref_key_user_id), "0");
+        rides.requestTicket(window_id, guest_id);
     }
 }

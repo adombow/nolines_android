@@ -23,6 +23,8 @@ import com.nolines.nolines.api.models.Ticket;
 import com.nolines.nolines.api.service.Updateable;
 import com.nolines.nolines.dummy.DummyContent;
 import com.nolines.nolines.dummy.DummyContent.DummyItem;
+import com.nolines.nolines.viewmodels.MapCard;
+import com.nolines.nolines.viewmodels.ReservationCard;
 import com.nolines.nolines.viewmodels.ServiceTestCard;
 import com.nolines.nolines.viewmodels.WelcomeCard;
 
@@ -75,7 +77,7 @@ public class HomeFragment extends Fragment implements Updateable{
         View view = inflater.inflate(R.layout.fragment_homecard_list, container, false);
         ButterKnife.bind(this,view);
 
-        toolbar.setTitle("Welcome to NoLines");
+        toolbar.setTitle("NoLines");
         ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
         ((MainActivity) getActivity()).setupActionBarDrawerToggle(toolbar);
 
@@ -86,8 +88,8 @@ public class HomeFragment extends Fragment implements Updateable{
         guest.registerListener(this);
         guest.refreshGuest();
         List<Object> list = new ArrayList<>();
-        list.add(new WelcomeCard("John"));
         list.add(new ServiceTestCard("Notification Service Test", "Send Notification"));
+        list.add(new ReservationCard());
 
         recyclerView.setAdapter(new HomeCardAdapter(list, mListener));
         return view;
@@ -117,6 +119,12 @@ public class HomeFragment extends Fragment implements Updateable{
     }
 
     @Override
+    public void onPause(){
+        super.onPause();
+        guest.unregisterListener(this);
+    }
+
+    @Override
     public void onRidesUpdate() {
 
     }
@@ -127,8 +135,10 @@ public class HomeFragment extends Fragment implements Updateable{
         if(guest.getGuestObject() != null) {
             list.add(new WelcomeCard(guest.getGuestObject().getName()));
         }
-        list.add(new WelcomeCard("John"));
+        list.add(new ReservationCard());
+        list.add(new MapCard());
         list.add(new ServiceTestCard("Notification Service Test", "Send Notification"));
+
 
         if(mAdapter == null) {
             mAdapter = new HomeCardAdapter(list, mListener);
@@ -156,6 +166,6 @@ public class HomeFragment extends Fragment implements Updateable{
      */
     public interface OnListFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onListFragmentInteraction(DummyItem item);
+        void onReservationHeaderClicked();
     }
 }

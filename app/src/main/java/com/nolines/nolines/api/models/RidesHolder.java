@@ -97,8 +97,6 @@ public class RidesHolder {
 
     private void getRides(){
 
-        NoLinesClient client = retrofit.create(NoLinesClient.class);
-
         DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
         //df1.setTimeZone(TimeZone.getTimeZone("UTC"));
         String requestDate = df1.format(calendar.getTime());

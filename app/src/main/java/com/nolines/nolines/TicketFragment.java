@@ -155,6 +155,12 @@ public class TicketFragment extends Fragment implements Updateable, RecyclerItem
     }
 
     @Override
+    public void onPause(){
+        super.onPause();
+        mGuest.unregisterListener(this);
+    }
+
+    @Override
     public void onDestroy(){
         super.onDestroy();
         mGuest.unregisterListener(this);

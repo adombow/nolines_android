@@ -206,6 +206,9 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
     public void onPause() {
         super.onPause();
 
+        guest.unregisterListener(this);
+        rides.unregisterListener(this);
+
         //stop location updates when Activity is no longer active
         if (mFusedLocationClient != null) {
             mFusedLocationClient.removeLocationUpdates(mLocationCallback);

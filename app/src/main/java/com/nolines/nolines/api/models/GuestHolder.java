@@ -61,7 +61,6 @@ public class GuestHolder {
         Retrofit retrofit = builder.build();
 
         client = retrofit.create(NoLinesClient.class);
-        getGuest();
     }
 
     public static GuestHolder getInstance(Context context) {
@@ -75,8 +74,7 @@ public class GuestHolder {
     private void getGuest(){
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext.get());
 
-        Call<Guest> call = client.getGuest(Integer.parseInt(prefs.getString(mContext.get().
-                getString(R.string.pref_key_user_id), "1")));
+        Call<Guest> call = client.getGuest(Integer.parseInt(prefs.getString(mContext.get().getString(R.string.pref_key_user_id), "0")));
 
         call.enqueue(new Callback<Guest>() {
             @Override

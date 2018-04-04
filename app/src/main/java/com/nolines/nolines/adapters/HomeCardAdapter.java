@@ -1,28 +1,25 @@
 package com.nolines.nolines.adapters;
 
-import android.content.Context;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.nolines.nolines.HomeFragment.OnListFragmentInteractionListener;
 import com.nolines.nolines.R;
-import com.nolines.nolines.api.models.GuestHolder;
-import com.nolines.nolines.api.models.Ride;
-import com.nolines.nolines.api.models.Ticket;
 import com.nolines.nolines.api.service.TicketAlarmProcessor;
 import com.nolines.nolines.dummy.DummyContent.DummyItem;
+import com.nolines.nolines.viewmodels.MapCard;
+import com.nolines.nolines.viewmodels.ReservationCard;
 import com.nolines.nolines.viewmodels.ServiceTestCard;
 import com.nolines.nolines.viewmodels.WelcomeCard;
 
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import butterknife.BindView;
@@ -39,7 +36,8 @@ public class HomeCardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private final OnListFragmentInteractionListener mListener;
 
     private final int WELCOME_CARD = 0;
-    private final int RIDE_CARD = 0;
+    private final int MAP_CARD = 1;
+    private final int RESERVATION_CARD = 2;
     private final int SERVICE_TEST_CARD = 3;
 
     public HomeCardAdapter(List<Object> cards, OnListFragmentInteractionListener listener) {
@@ -51,19 +49,41 @@ public class HomeCardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         RecyclerView.ViewHolder viewHolder;
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+        View view;
+
 
         switch (viewType) {
             case WELCOME_CARD:
-                View v1 = inflater.inflate(R.layout.fragment_welcome_card, parent, false);
-                viewHolder = new WelcomeCardViewHolder(v1);
+                view = inflater.inflate(R.layout.card_welcome, parent, false);
+                view.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if (null != mListener) {
+                            // Notify the active callbacks interface (the activity, if the
+                            // fragment is attached to one) that an item has been selected.
+                            mListener.onReservationHeaderClicked();
+                        }
+                    }
+                });
+
+                viewHolder = new WelcomeCardViewHolder(view);
                 break;
             case SERVICE_TEST_CARD:
-                View v2 = inflater.inflate(R.layout.fragment_welcome_card, parent, false);
-                viewHolder = new ServiceTestCardViewHolder(v2);
+                view = inflater.inflate(R.layout.card_notification_test, parent, false);
+                viewHolder = new ServiceTestCardViewHolder(view);
                 break;
+            case MAP_CARD:
+                view = inflater.inflate(R.layout.card_map, parent, false);
+                viewHolder = new MapCardViewHolder(view);
+                break;
+            case RESERVATION_CARD:
+                view = inflater.inflate(R.layout.card_default, parent, false);
+                viewHolder = new ReservationCardViewHolder(view);
+                break;
+
             default:
-                View vd = inflater.inflate(R.layout.fragment_welcome_card, parent, false);
-                viewHolder = new WelcomeCardViewHolder(vd);
+                view = inflater.inflate(R.layout.card_default, parent, false);
+                viewHolder = new WelcomeCardViewHolder(view);
                 break;
         }
         return viewHolder;
@@ -89,13 +109,14 @@ public class HomeCardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             case WELCOME_CARD:
                 WelcomeCardViewHolder vh1 = (WelcomeCardViewHolder) viewHolder;
                 WelcomeCard card = (WelcomeCard) mCards.get(position);
-                ((WelcomeCardViewHolder) viewHolder).textView.setText(card.getName());
+                ((WelcomeCardViewHolder) viewHolder).textView.setText("Welcome " + card.getName()+"!");
                 break;
             case SERVICE_TEST_CARD:
                 ServiceTestCardViewHolder vh3 = (ServiceTestCardViewHolder) viewHolder;
                 ServiceTestCard stCard = (ServiceTestCard) mCards.get(position);
                 vh3.textView.setText(stCard.getDescription());
                 vh3.button.setText(stCard.getButtonText());
+                vh3.imageView.setImageResource(R.drawable.blueprint);
                 vh3.button.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -107,6 +128,19 @@ public class HomeCardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                         TicketAlarmProcessor.startActionCheckTickets(v.getContext(), -1, TicketAlarmProcessor.NotificationType.CLOSE);
                     }
                 });
+                break;
+            case MAP_CARD:
+                MapCardViewHolder vh = (MapCardViewHolder) viewHolder;
+                vh.title.setText("Lost?");
+                vh.subtitle.setText("We can provide you with directions to your next attraction!");
+                break;
+            case RESERVATION_CARD:
+                ReservationCardViewHolder vh4 = (ReservationCardViewHolder) viewHolder;
+
+                vh4.title.setText("Tired of waiting in line?");
+                vh4.subtitle.setText("Make a NoLines reservation to reserve your spot in line.");
+                vh4.imageView.setImageResource(R.drawable.header_lines);
+                break;
             default:
                 break;
         }
@@ -119,6 +153,10 @@ public class HomeCardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             return WELCOME_CARD;
         } else if(card instanceof ServiceTestCard){
             return SERVICE_TEST_CARD;
+        } else if (card instanceof ReservationCard) {
+            return RESERVATION_CARD;
+        } else if(card instanceof MapCard){
+            return MAP_CARD;
         }
 
         return -1;
@@ -135,7 +173,6 @@ public class HomeCardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     public class WelcomeCardViewHolder extends RecyclerView.ViewHolder {
-        @BindView(R.id.welcome_cardview) CardView cardView;
         @BindView(R.id.title) TextView textView;
 
         public WelcomeCardViewHolder(View view) {
@@ -148,8 +185,34 @@ public class HomeCardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         @BindView(R.id.welcome_cardview) CardView cardView;
         @BindView(R.id.title) TextView textView;
         @BindView(R.id.welcome_card_button) Button button;
+        @BindView(R.id.card_image) ImageView imageView;
 
         public ServiceTestCardViewHolder(View view) {
+            super(view);
+            ButterKnife.bind(this,view);
+        }
+    }
+
+    public class ReservationCardViewHolder extends RecyclerView.ViewHolder {
+        @BindView(R.id.welcome_cardview) CardView cardView;
+        @BindView(R.id.title) TextView title;
+        @BindView(R.id.subtitle) TextView subtitle;
+        @BindView(R.id.welcome_card_button) Button button;
+        @BindView(R.id.card_image) ImageView imageView;
+
+        public ReservationCardViewHolder(View view) {
+            super(view);
+            ButterKnife.bind(this,view);
+        }
+    }
+
+    public class MapCardViewHolder extends RecyclerView.ViewHolder {
+        @BindView(R.id.welcome_cardview) CardView cardView;
+        @BindView(R.id.title) TextView title;
+        @BindView(R.id.subtitle) TextView subtitle;
+        @BindView(R.id.welcome_card_button) Button button;
+
+        public MapCardViewHolder(View view) {
             super(view);
             ButterKnife.bind(this,view);
         }
