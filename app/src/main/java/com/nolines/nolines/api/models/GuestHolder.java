@@ -1,13 +1,18 @@
 package com.nolines.nolines.api.models;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.nolines.nolines.R;
+import com.nolines.nolines.api.service.AlarmReceiver;
 import com.nolines.nolines.api.service.NoLinesClient;
+import com.nolines.nolines.api.service.TicketAlarmProcessor;
 import com.nolines.nolines.api.service.Updateable;
 
 import java.lang.ref.WeakReference;
@@ -96,10 +101,9 @@ public class GuestHolder {
         });
     }
 
-    public void cancelTicket(int ticket_id){
+    public void cancelTicket(final int ticket_id){
 
         Call<Void> call = client.cancelTicket(ticket_id);
-
 
         call.enqueue(new Callback<Void>() {
             @Override
@@ -107,6 +111,17 @@ public class GuestHolder {
                 Log.i(TAG, "Response Received");
                 if(response.raw().code() == 200){
                     getGuest();
+                }
+                AlarmManager alarmManager = (AlarmManager) mContext.get()
+                        .getSystemService(Context.ALARM_SERVICE);
+                Intent intent = new Intent(mContext.get().getApplicationContext(),
+                        AlarmReceiver.class);
+                for(int i = 0; i < 4; i++){
+                    PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                            mContext.get().getApplicationContext(),
+                            TicketAlarmProcessor.getUniqueID(ticket_id, i),
+                            intent, 0);
+                    alarmManager.cancel(pendingIntent);
                 }
             }
 

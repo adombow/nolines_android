@@ -213,7 +213,7 @@ public class TicketAlarmProcessor extends IntentService {
     private static void setNotificationsForTicket(Ticket ticket, Intent intent, Context context){
         Intent ticketProcessorReceiver = intent;
         if(ticketProcessorReceiver == null)
-            ticketProcessorReceiver = new Intent(context, AlarmReceiver.class);
+            ticketProcessorReceiver = new Intent(context.getApplicationContext(), AlarmReceiver.class);
         ticketProcessorReceiver.putExtra(NOTIFICATION_TICKET_ID, ticket.getRide().getId());
 
         AlarmManager alarmManager = (AlarmManager)context.getSystemService(context.ALARM_SERVICE);
@@ -227,14 +227,14 @@ public class TicketAlarmProcessor extends IntentService {
         //an alert for it at timeToAlert seconds before the window opens and when the window opens
         if(timeUntilStart > 60){
             ticketProcessorReceiver.putExtra(NOTIFICATION_TYPE, NotificationType.OPEN);
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(context,
-                    getNotificationID(ticket.getId(), 0), ticketProcessorReceiver, 0);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(context.getApplicationContext(),
+                    getUniqueID(ticket.getId(), 0), ticketProcessorReceiver, 0);
             alarmManager.set(AlarmManager.RTC_WAKEUP, startTime * 1000, pendingIntent);
 
             if(timeUntilStart > TicketAlarmProcessor.timeToAlert) {
                 ticketProcessorReceiver.putExtra(NOTIFICATION_TYPE, NotificationType.PRE_OPEN);
-                pendingIntent = PendingIntent.getBroadcast(context,
-                        getNotificationID(ticket.getId(), 1), ticketProcessorReceiver, 0);
+                pendingIntent = PendingIntent.getBroadcast(context.getApplicationContext(),
+                        getUniqueID(ticket.getId(), 1), ticketProcessorReceiver, 0);
                 alarmManager.set(AlarmManager.RTC_WAKEUP, (startTime - TicketAlarmProcessor.timeToAlert) * 1000, pendingIntent);
             }
         }
@@ -244,14 +244,14 @@ public class TicketAlarmProcessor extends IntentService {
         //an alert for it at timeToAlert seconds before the window closes and when the window closes
         if(timeUntilEnd > 60) {
             ticketProcessorReceiver.putExtra(NOTIFICATION_TYPE, NotificationType.CLOSE);
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(context,
-                    getNotificationID(ticket.getId(), 2), ticketProcessorReceiver, 0);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(context.getApplicationContext(),
+                    getUniqueID(ticket.getId(), 2), ticketProcessorReceiver, 0);
             alarmManager.set(AlarmManager.RTC_WAKEUP, endTime * 1000, pendingIntent);
 
             if (timeUntilEnd > TicketAlarmProcessor.timeToAlert) {
                 ticketProcessorReceiver.putExtra(NOTIFICATION_TYPE, NotificationType.PRE_CLOSE);
-                pendingIntent = PendingIntent.getBroadcast(context,
-                        getNotificationID(ticket.getId(), 3), ticketProcessorReceiver, 0);
+                pendingIntent = PendingIntent.getBroadcast(context.getApplicationContext(),
+                        getUniqueID(ticket.getId(), 3), ticketProcessorReceiver, 0);
                 alarmManager.set(AlarmManager.RTC_WAKEUP, (endTime - TicketAlarmProcessor.timeToAlert) * 1000, pendingIntent);
             }
         }
@@ -265,7 +265,7 @@ public class TicketAlarmProcessor extends IntentService {
      * @return A unique number only obtainable if the
      * same 2 numbers are input again in the same order
      */
-    public static int getNotificationID(int a, int b){
+    public static int getUniqueID(int a, int b){
         //Cantor pairing function to get unique number from a number pair
         //returns different results for each ordering (i.e. a,b or b,a)
         return ((a+b)*(a+b+1))/2+b;
