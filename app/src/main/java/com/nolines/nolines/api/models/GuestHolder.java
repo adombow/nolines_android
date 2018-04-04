@@ -1,9 +1,12 @@
 package com.nolines.nolines.api.models;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.nolines.nolines.R;
 import com.nolines.nolines.api.service.NoLinesClient;
 import com.nolines.nolines.api.service.Updateable;
 
@@ -48,23 +51,31 @@ public class GuestHolder {
     public void refreshGuest() { getGuest(); }
 
     private void getGuest(){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext.get());
 
-        /* Modify Later to put baseUrl globally*/
-        Retrofit.Builder builder = new Retrofit.Builder()
-                .baseUrl("http://nolines-production.herokuapp.com/")
-                //.baseUrl("http://128.189.92.71:3001/")
-                .addConverterFactory(GsonConverterFactory.create());
+        Retrofit.Builder builder;
+        try{
+            builder = new Retrofit.Builder()
+                    .baseUrl(prefs.getString(mContext.get().getString(R.string.pref_key_server_url),
+                            mContext.get().getString(R.string.pref_server_url_remote)))
+                    .addConverterFactory(GsonConverterFactory.create());
+        } catch(IllegalArgumentException e) {
+            builder = new Retrofit.Builder()
+                    .baseUrl(mContext.get().getString(R.string.pref_server_url_remote))
+                    .addConverterFactory(GsonConverterFactory.create());
+        }
 
         Retrofit retrofit = builder.build();
 
         NoLinesClient client = retrofit.create(NoLinesClient.class);
-        //TODO: Get guest id from sharedpreferences?
-        Call<Guest> call = client.getGuest(1);
+
+        Call<Guest> call = client.getGuest(Integer.parseInt(prefs.getString(mContext.get().
+                getString(R.string.pref_key_user_id), "1")));
 
         call.enqueue(new Callback<Guest>() {
             @Override
             public void onResponse(Call<Guest> call, Response<Guest> response) {
-                Log.i(TAG, "Repsonse Recieved");
+                Log.i(TAG, "Response Received");
                 guest = response.body();
                 for(Updateable listener : listeners){
                     try{

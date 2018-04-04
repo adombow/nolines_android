@@ -35,7 +35,7 @@ import butterknife.ButterKnife;
  */
 public class HomeCardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private final List<Object> mCards;
+    private List<Object> mCards;
     private final OnListFragmentInteractionListener mListener;
 
     private final int WELCOME_CARD = 0;
@@ -90,7 +90,6 @@ public class HomeCardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 WelcomeCardViewHolder vh1 = (WelcomeCardViewHolder) viewHolder;
                 WelcomeCard card = (WelcomeCard) mCards.get(position);
                 ((WelcomeCardViewHolder) viewHolder).textView.setText(card.getName());
-
                 break;
             case SERVICE_TEST_CARD:
                 ServiceTestCardViewHolder vh3 = (ServiceTestCardViewHolder) viewHolder;
@@ -123,6 +122,11 @@ public class HomeCardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         }
 
         return -1;
+    }
+
+    public void updateHomeCardList(List<Object> cards){
+        mCards = cards;
+        notifyDataSetChanged();
     }
 
     @Override

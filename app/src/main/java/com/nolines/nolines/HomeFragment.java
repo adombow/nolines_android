@@ -2,8 +2,10 @@ package com.nolines.nolines;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
@@ -13,8 +15,11 @@ import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.nolines.nolines.adapters.HomeCardAdapter;
+import com.nolines.nolines.api.models.GuestHolder;
+import com.nolines.nolines.api.service.Updateable;
 import com.nolines.nolines.dummy.DummyContent;
 import com.nolines.nolines.dummy.DummyContent.DummyItem;
 import com.nolines.nolines.viewmodels.ServiceTestCard;
@@ -32,7 +37,7 @@ import butterknife.ButterKnife;
  * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
  * interface.
  */
-public class HomeFragment extends Fragment {
+public class HomeFragment extends Fragment implements Updateable{
 
     @BindView(R.id.home_recycler_view) RecyclerView recyclerView;
     @BindView(R.id.toolbar) Toolbar toolbar;
@@ -40,6 +45,8 @@ public class HomeFragment extends Fragment {
     private MainActivity appCompatActivity;
 
     private OnListFragmentInteractionListener mListener;
+    private GuestHolder guest;
+    private HomeCardAdapter mAdapter;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -74,15 +81,16 @@ public class HomeFragment extends Fragment {
         // Set the adapter
         recyclerView.setLayoutManager(new LinearLayoutManager(this.getContext()));
 
-        List<Object> list= new ArrayList<>();
-        list.add(new WelcomeCard("Timothy"));
+        guest = GuestHolder.getInstance(this.getContext());
+        guest.registerListener(this);
+        guest.refreshGuest();
+        List<Object> list = new ArrayList<>();
         list.add(new WelcomeCard("John"));
         list.add(new ServiceTestCard("Notification Service Test", "Send Notification"));
 
         recyclerView.setAdapter(new HomeCardAdapter(list, mListener));
         return view;
     }
-
 
     @Override
     public void onAttach(Context context) {
@@ -99,6 +107,34 @@ public class HomeFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        guest.unregisterListener(this);
+    }
+
+    @Override
+    public void onRidesUpdate() {
+
+    }
+
+    @Override
+    public void onGuestUpdate() {
+        List<Object> list = new ArrayList<>();
+        if(guest.getGuestObject() != null) {
+            list.add(new WelcomeCard(guest.getGuestObject().getName()));
+        }
+        list.add(new WelcomeCard("John"));
+        list.add(new ServiceTestCard("Notification Service Test", "Send Notification"));
+
+        if(mAdapter == null) {
+            mAdapter = new HomeCardAdapter(list, mListener);
+            recyclerView.setAdapter(mAdapter);
+        }else{
+            mAdapter.updateHomeCardList(list);
+        }
     }
 
     /**

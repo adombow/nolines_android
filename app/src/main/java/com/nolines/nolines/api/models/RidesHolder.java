@@ -1,8 +1,12 @@
 package com.nolines.nolines.api.models;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
+
+import com.nolines.nolines.R;
 import com.nolines.nolines.api.service.NoLinesClient;
 import com.nolines.nolines.api.service.Updateable;
 
@@ -70,11 +74,19 @@ public class RidesHolder {
 
     private void getRides(){
 
-        /* Modify Later to put baseUrl globally*/
-        Retrofit.Builder builder = new Retrofit.Builder()
-                .baseUrl("http://nolines-production.herokuapp.com/")
-                //.baseUrl("http://192.168.1.83:3001/")
-                .addConverterFactory(GsonConverterFactory.create());
+        SharedPreferences prefs =  PreferenceManager.getDefaultSharedPreferences(mContext.get());
+
+        Retrofit.Builder builder;
+        try{
+            builder = new Retrofit.Builder()
+                    .baseUrl(prefs.getString(mContext.get().getString(R.string.pref_key_server_url),
+                            mContext.get().getString(R.string.pref_server_url_remote)))
+                    .addConverterFactory(GsonConverterFactory.create());
+        } catch(IllegalArgumentException e){
+            builder = new Retrofit.Builder()
+                    .baseUrl(mContext.get().getString(R.string.pref_server_url_remote))
+                    .addConverterFactory(GsonConverterFactory.create());
+        }
 
         Retrofit retrofit = builder.build();
 

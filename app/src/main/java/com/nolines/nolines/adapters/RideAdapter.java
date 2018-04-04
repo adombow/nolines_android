@@ -19,10 +19,12 @@ import com.nolines.nolines.RideFragment.OnListFragmentInteractionListener;
 import com.nolines.nolines.RideWindowDialog;
 import com.nolines.nolines.api.models.Ride;
 import com.nolines.nolines.api.models.RideWindow;
+import com.nolines.nolines.api.models.Ticket;
 import com.squareup.picasso.Picasso;
 
 
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -99,6 +101,7 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder
             public void onClick(View view, int window_position) {
                 //Toast.makeText(mContext, "Position: " + window_position + " " + position, Toast.LENGTH_SHORT).show();
                 Ride ride = mRides.get(position);
+
                 DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
                 df1.setTimeZone(TimeZone.getTimeZone("UTC"));
                 Date date;
