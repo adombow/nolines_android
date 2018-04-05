@@ -27,6 +27,7 @@ import com.nolines.nolines.api.models.GuestHolder;
 import com.nolines.nolines.api.models.Ride;
 import com.nolines.nolines.api.models.RidesHolder;
 import com.nolines.nolines.api.models.Ticket;
+import com.nolines.nolines.api.service.TicketAlarmProcessor;
 import com.nolines.nolines.api.service.Updateable;
 
 import java.util.Calendar;
@@ -270,11 +271,11 @@ public class RideFragment extends Fragment implements Updateable, RideWindowDial
             TicketCreatedDialog dialog = TicketCreatedDialog.newInstance(this, ticket, getString(R.string.header_reservation_made));
             dialog.show(((Activity) this.getContext()).getFragmentManager(), "TicketCreated");
             GuestHolder.getInstance(this.getActivity()).refreshGuest();
+            TicketAlarmProcessor.setNotificationsForTicket(ticket, this.getContext());
         }
         else {
             TicketErrorDialog dialog = new TicketErrorDialog();
             dialog.show(((Activity) this.getContext()).getFragmentManager(), "TicketError");
-
         }
 
         swipeRefreshLayout.setRefreshing(true);

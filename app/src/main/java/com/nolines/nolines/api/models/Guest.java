@@ -30,7 +30,14 @@ public class Guest {
     }
 
     public String getName(){ return this.name; }
+    public List<Ticket> getTickets(){
 
+        if(tickets == null){
+            tickets = new ArrayList<>();
+        }
+
+        return tickets;
+    }
     /**
      * Gets a list of all of this guest's tickets that are available for the date represented by testDate
      * @return List of all the tickets with start times set for testDate and an empty
@@ -51,13 +58,5 @@ public class Guest {
             }
         }
         return datedTickets;
-    }
-    public List<Ticket> getTickets(){
-
-        if(tickets == null){
-            tickets = new ArrayList<>();
-        }
-
-        return tickets;
     }
 }
