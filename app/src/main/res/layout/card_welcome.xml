@@ -19,7 +19,7 @@
             android:layout_height="wrap_content"
             android:text="Title"
             android:textColor="@color/white"
-            android:textSize="24sp"
+            android:textSize="30sp"
             android:layout_marginBottom="5dp"
             android:id="@+id/title"
             />

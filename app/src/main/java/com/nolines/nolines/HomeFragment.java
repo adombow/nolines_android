@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.nolines.nolines.adapters.HomeCardAdapter;
+import com.nolines.nolines.api.models.Guest;
 import com.nolines.nolines.api.models.GuestHolder;
 import com.nolines.nolines.api.models.Ticket;
 import com.nolines.nolines.api.service.Updateable;
@@ -26,9 +27,11 @@ import com.nolines.nolines.dummy.DummyContent.DummyItem;
 import com.nolines.nolines.viewmodels.MapCard;
 import com.nolines.nolines.viewmodels.ReservationCard;
 import com.nolines.nolines.viewmodels.ServiceTestCard;
+import com.nolines.nolines.viewmodels.ShopCard;
 import com.nolines.nolines.viewmodels.WelcomeCard;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import butterknife.BindView;
@@ -88,8 +91,16 @@ public class HomeFragment extends Fragment implements Updateable{
         guest.registerListener(this);
         guest.refreshGuest();
         List<Object> list = new ArrayList<>();
-        list.add(new ServiceTestCard("Notification Service Test", "Send Notification"));
+
+        if(guest.getGuestObject() != null) {
+            Guest guest_obj = guest.getGuestObject();
+            Calendar calendar = Calendar.getInstance();
+            list.add(new WelcomeCard(guest_obj.getName(), guest_obj.getTicketsForDate(calendar).size()));
+        }
         list.add(new ReservationCard());
+        list.add(new MapCard());
+        list.add(new ShopCard());
+        list.add(new ServiceTestCard("Notification Service Test", "Send Notification"));
 
         recyclerView.setAdapter(new HomeCardAdapter(list, mListener));
         return view;
@@ -133,10 +144,13 @@ public class HomeFragment extends Fragment implements Updateable{
     public void onGuestUpdate() {
         List<Object> list = new ArrayList<>();
         if(guest.getGuestObject() != null) {
-            list.add(new WelcomeCard(guest.getGuestObject().getName()));
+            Guest guest_obj = guest.getGuestObject();
+            Calendar calendar = Calendar.getInstance();
+            list.add(new WelcomeCard(guest_obj.getName(), guest_obj.getTicketsForDate(calendar).size()));
         }
         list.add(new ReservationCard());
         list.add(new MapCard());
+        list.add(new ShopCard());
         list.add(new ServiceTestCard("Notification Service Test", "Send Notification"));
 
 
@@ -166,6 +180,6 @@ public class HomeFragment extends Fragment implements Updateable{
      */
     public interface OnListFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onReservationHeaderClicked();
+        void onHomeCardClicked(int viewType);
     }
 }

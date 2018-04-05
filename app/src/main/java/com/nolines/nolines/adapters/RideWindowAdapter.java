@@ -16,6 +16,7 @@ import com.nolines.nolines.api.models.Ticket;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -51,18 +52,14 @@ public class RideWindowAdapter extends RecyclerView.Adapter<RideWindowAdapter.Ri
     public void onBindViewHolder(final RideWindowViewHolder holder, final int position) {
         RideWindow rideWindow = mRideWindows.get(position);
 
-        DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        df1.setTimeZone(TimeZone.getTimeZone("UTC"));
-        Date date;
+        Calendar cal = rideWindow.getLocalDatetimeFromTime();
+        cal.add(Calendar.HOUR, 1);
+        SimpleDateFormat formatter = new SimpleDateFormat("h:mm a");
+        formatter.setTimeZone(TimeZone.getDefault());
 
-        try {
-            date = df1.parse(rideWindow.getStartTime());
-           holder.button1.setText(DateFormat.getTimeInstance(DateFormat.SHORT).format(date.getTime()));
-        }
-        catch(Exception e){
+        String startTime = formatter.format(cal.getTime());
 
-        }
-
+        holder.button1.setText(startTime);
         holder.button1.setClickable(false);
 
     }

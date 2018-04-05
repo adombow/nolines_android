@@ -15,6 +15,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.nolines.nolines.adapters.HomeCardAdapter;
 import com.nolines.nolines.api.models.Guest;
 import com.nolines.nolines.api.models.Ride;
 import com.nolines.nolines.api.models.Ticket;
@@ -142,9 +143,30 @@ public class MainActivity extends AppCompatActivity
     public void onListFragmentInteraction(Ride ride){}
 
     @Override
-    public void onReservationHeaderClicked(){
+    public void onHomeCardClicked(int viewType){
         try {
-            replaceFragmentWithAnimation(TicketFragment.class.newInstance(), "TicketFragment");
+            switch(viewType){
+
+                /*
+                public final int WELCOME_CARD = 0;
+                public final int MAP_CARD = 1;
+                public final int RESERVATION_CARD = 2;
+                public final int SERVICE_TEST_CARD = 3;
+                public final int SHOP_CARD = 4;
+                */
+
+                case 0:
+                    replaceFragmentWithAnimation(TicketFragment.class.newInstance(), "TicketFragment");
+                    break;
+                case 1:
+                    replaceFragmentWithAnimation(MapsFragment.class.newInstance(), "MapFragment");
+                    break;
+
+                case 2:
+                    replaceFragmentWithAnimation(RideFragment.class.newInstance(), "RideFragment");
+                    break;
+
+            }
         }
         catch(Exception e){e.printStackTrace();}
     }

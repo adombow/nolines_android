@@ -303,7 +303,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
 
     @Override
     public void onInfoWindowClick(Marker marker){
-        Toast.makeText(this.getContext(), "Info Window Clicked!", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this.getContext(), "Info Window Clicked!", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -337,8 +337,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
                 MarkerOptions markerOptions = new MarkerOptions();
                 markerOptions.position(latLng);
                 markerOptions.title(ride.getName());
-                markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN));
-                markerOptions.snippet(ride.getRideType() + "\n" + getString(R.string.wait_time) + ride.getWaitTime());
+                markerOptions.icon(BitmapDescriptorFactory.defaultMarker(174));
+                markerOptions.snippet(getString(R.string.wait_time) + " " + ride.getWaitTime());
                 if (guest != null && !guest.getGuestObject().getTickets().isEmpty()) {
                     for (Ticket ticket : guest.getGuestObject().getTickets()) {
                         if (ticket.getRide().getName().equals(ride.getName())) {
@@ -353,8 +353,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
                             cal.add(Calendar.HOUR, 1);
                             String endTime = formatter.format(cal.getTime());
 
-                            markerOptions.snippet(getString(R.string.ride_window_text, startTime, endTime) +
-                                    "\n" + getString(R.string.wait_time) + ride.getWaitTime());
+                            markerOptions.snippet(startTime + " - " + endTime);
                         }
                     }
                 }
@@ -445,11 +444,11 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
     @Override
     public void onDirectionSuccess(Direction direction, String rawBody) {
         if(direction.isOK()){
-            Toast.makeText(this.getContext(), "Getting directions...", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this.getContext(), "Getting directions...", Toast.LENGTH_SHORT).show();
             Route route = direction.getRouteList().get(0);
             ArrayList<LatLng> directionPositionList = route.getLegList().get(0).getDirectionPoint();
             currentDirections = mMap.addPolyline(DirectionConverter.createPolyline(this.getContext(),
-                    directionPositionList, 5, Color.RED));
+                    directionPositionList, 3, getResources().getColor(R.color.colorAccent)));
             setCameraWithinCoordinationBounds(route);
         }else{
             Toast.makeText(this.getContext(), direction.getErrorMessage(), Toast.LENGTH_LONG).show();
@@ -508,13 +507,10 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
             //Make everything blank in case we don't find the ride
             markerPic.setImageResource(0);
 
-            SpannableString titleText = new SpannableString(marker.getTitle());
-            titleText.setSpan(new ForegroundColorSpan(Color.RED), 0, titleText.length(), 0);
-            markerName.setText(titleText);
 
-            titleText = new SpannableString(marker.getSnippet());
-            titleText.setSpan(new ForegroundColorSpan(Color.BLACK), 0, titleText.length(), 0);
-            markerInfo.setText(titleText);
+            markerName.setText(marker.getTitle());
+
+            markerInfo.setText(marker.getSnippet());
 
             for(Ride ride : rides.getRideList()){
                 if(marker.getTitle().equals(ride.getName())) {

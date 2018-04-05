@@ -64,7 +64,6 @@ public class RidesHolder {
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext.get());
 
-        Retrofit.Builder builder;
         try{
             builder = new Retrofit.Builder()
                     .baseUrl(prefs.getString(mContext.get().getString(R.string.pref_key_server_url),
@@ -76,7 +75,7 @@ public class RidesHolder {
                     .addConverterFactory(GsonConverterFactory.create());
         }
 
-        Retrofit retrofit = builder.build();
+        retrofit = builder.build();
 
         client = retrofit.create(NoLinesClient.class);
 

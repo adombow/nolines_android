@@ -16,9 +16,11 @@ import com.nolines.nolines.TicketFragment.OnListFragmentInteractionListener;
 import com.nolines.nolines.api.models.Ticket;
 import com.squareup.picasso.Picasso;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 import java.util.TimeZone;
 
 import butterknife.BindView;
@@ -50,17 +52,19 @@ public class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.TicketView
     @Override
     public void onBindViewHolder(final TicketViewHolder holder, final int position) {
         holder.title.setText(mTickets.get(position).getRide().getName());
-        holder.details.setText(mTickets.get(position).getRide().getRideType());
+
 
         Calendar cal = mTickets.get(position).getLocalDatetimeFromTime();
         SimpleDateFormat formatter = new SimpleDateFormat("h:mm a");
         formatter.setTimeZone(TimeZone.getDefault());
 
-        String startTime = formatter.format(cal.getTime());
+        String dateString = DateFormat.getDateInstance(DateFormat.FULL, Locale.CANADA).format(cal.getTime());
+        String startTime= formatter.format(cal.getTime());
         cal.add(Calendar.HOUR, 1);
         String endTime = formatter.format(cal.getTime());
 
         String windowText = mContext.getString(R.string.ride_window_text, startTime, endTime);
+        holder.details.setText(dateString);
         holder.rideWindow.setText(windowText);
         Picasso.get().load(mTickets.get(position).getRide().getPhotoURL()).into(holder.rideImage);
 
