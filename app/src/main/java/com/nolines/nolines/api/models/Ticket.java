@@ -1,5 +1,6 @@
 package com.nolines.nolines.api.models;
 
+import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -11,7 +12,7 @@ import java.util.TimeZone;
  * Created by timot on 3/14/2018.
  */
 
-public class Ticket {
+public class Ticket implements Serializable{
 
     private int id;
     private String time;
@@ -19,7 +20,8 @@ public class Ticket {
 
     public static final String dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
-    public Ticket(String time, Ride ride) {
+    public Ticket(int id, String time, Ride ride) {
+        this.id = id;
         this.time = time;
         this.ride = ride;
     }

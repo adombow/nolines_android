@@ -26,7 +26,7 @@ public class Guest {
         SimpleDateFormat df = new SimpleDateFormat(Ticket.dateFormat);
         df.setTimeZone(TimeZone.getTimeZone("UTC"));
         String startTime = df.format(c.getTime());
-        this.tickets.add(new Ticket(startTime, new Ride("Rollercoaster", 1)));
+        this.tickets.add(new Ticket(0, startTime, new Ride("Rollercoaster", 1)));
     }
 
     public String getName(){ return this.name; }

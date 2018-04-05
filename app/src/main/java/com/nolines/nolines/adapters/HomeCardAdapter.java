@@ -1,5 +1,9 @@
 package com.nolines.nolines.adapters;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -13,6 +17,10 @@ import android.widget.Toast;
 
 import com.nolines.nolines.HomeFragment.OnListFragmentInteractionListener;
 import com.nolines.nolines.R;
+import com.nolines.nolines.api.models.Ride;
+import com.nolines.nolines.api.models.RidesHolder;
+import com.nolines.nolines.api.models.Ticket;
+import com.nolines.nolines.api.service.AlarmReceiver;
 import com.nolines.nolines.api.service.TicketAlarmProcessor;
 import com.nolines.nolines.dummy.DummyContent.DummyItem;
 import com.nolines.nolines.viewmodels.MapCard;
@@ -20,7 +28,10 @@ import com.nolines.nolines.viewmodels.ReservationCard;
 import com.nolines.nolines.viewmodels.ServiceTestCard;
 import com.nolines.nolines.viewmodels.WelcomeCard;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.List;
+import java.util.TimeZone;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -122,10 +133,30 @@ public class HomeCardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                     public void onClick(View v) {
                         Toast.makeText(v.getContext(), "Notification sent!", Toast.LENGTH_SHORT).show();
 
-                        //GuestHolder guest = GuestHolder.getInstance(v.getContext());
-                        //TicketAlarmProcessor.setNotificationsForTicket(guest.getGuestObject().getTickets().get(0), v.getContext());
+                        int ticket_id = 1111;
+                        AlarmManager alarmManager = (AlarmManager) v.getContext()
+                                .getSystemService(Context.ALARM_SERVICE);
+                        Intent intent = new Intent(v.getContext().getApplicationContext(),
+                                AlarmReceiver.class);
+                        for(int i = 0; i < 4; i++){
+                            PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                                    v.getContext().getApplicationContext(),
+                                    TicketAlarmProcessor.getUniqueID(ticket_id, i),
+                                    intent, 0);
+                            alarmManager.cancel(pendingIntent);
+                        }
 
-                        TicketAlarmProcessor.startActionCheckTickets(v.getContext(), -1, TicketAlarmProcessor.NotificationType.CLOSE);
+                        SimpleDateFormat df = new SimpleDateFormat(Ticket.dateFormat);
+                        df.setTimeZone(TimeZone.getTimeZone("UTC"));
+                        Calendar cal = Calendar.getInstance();
+                        cal.add(Calendar.SECOND, TicketAlarmProcessor.timeToAlert + 10);
+                        String date = df.format(Calendar.getInstance().getTime());
+                        TicketAlarmProcessor.setTicketNotification( "Rollercoaster", date, 1234,
+                                v.getContext(),
+                                TicketAlarmProcessor.NotificationType.PRE_OPEN);
+
+                        //TicketAlarmProcessor.startActionSendRideNotification(v.getContext(), -1,
+                                //TicketAlarmProcessor.NotificationType.CLOSE);
                     }
                 });
                 break;

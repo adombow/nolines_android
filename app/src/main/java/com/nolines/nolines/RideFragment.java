@@ -260,7 +260,8 @@ public class RideFragment extends Fragment implements Updateable, RideWindowDial
         if(status_code == 200){
             TicketCreatedDialog dialog = TicketCreatedDialog.newInstance(this, ticket, getString(R.string.header_reservation_made));
             dialog.show(((Activity) this.getContext()).getFragmentManager(), "TicketCreated");
-            TicketAlarmProcessor.setNotificationsForTicket(ticket, this.getContext());
+            TicketAlarmProcessor.setTicketNotification(ticket.getRide().getName(), ticket.getTime(),
+                    ticket.getId(), this.getContext(), TicketAlarmProcessor.NotificationType.PRE_OPEN);
         }
         else {
             TicketErrorDialog dialog = new TicketErrorDialog();

@@ -15,6 +15,8 @@ public class RideWindow {
     private int sold;
     private int limit;
 
+    public static int windowLength = 120;//3600 //length of ride window (in seconds)
+
     public int getId() {
         return id;
     }

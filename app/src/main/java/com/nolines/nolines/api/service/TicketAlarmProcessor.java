@@ -16,20 +16,17 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
-import android.support.v4.app.TaskStackBuilder;
 
-import com.nolines.nolines.MapsFragment;
 import com.nolines.nolines.R;
-import com.nolines.nolines.api.models.Guest;
 import com.nolines.nolines.api.models.GuestHolder;
+import com.nolines.nolines.api.models.RideWindow;
 import com.nolines.nolines.api.models.Ticket;
 
-import java.net.URI;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
 import java.util.TimeZone;
 
 /**
@@ -37,13 +34,17 @@ import java.util.TimeZone;
  * a service on a separate handler thread.
  * <p>
  */
-public class TicketAlarmProcessor extends IntentService {
+public class TicketAlarmProcessor extends IntentService{
 
-    public static final int timeToAlert = 300; //Time before the event to send an alert for (in seconds)
+    public static final int timeToAlert = 90; //Time before the event to send an alert for (in seconds)
 
     private static final String RIDE_NOTIFICATION_CHANNEL_ID = "com.nolines.nolines.RIDE_NOTIFICATIONS";
 
-    private static final String ACTION_CHECK_TICKETS = "com.nolines.nolines.api.service.action.CHECK_TICKETS";
+    private static final String ACTION_SEND_RIDE_NOTIFICATION = "com.nolines.nolines.api.service.action.SEND_RIDE_NOTIFICATION";
+
+    public static final String NOTIFICATION_BUNDLE = "com.nolines.nolines.NOTIFICATION_BUNDLE";
+    public static final String NOTIFICATION_RIDE_NAME = "com.nolines.nolines.NOTIFICATION_RIDE_NAME";
+    public static final String NOTIFICATION_TICKET_START_TIME = "com.nolines.nolines.NOTIFICATION_TICKET_START_TIME";
     public static final String NOTIFICATION_TICKET_ID = "com.nolines.nolines.NOTIFICATION_TICKET_ID";
     public static final String NOTIFICATION_TYPE = "com.nolines.nolines.NOTIFICATION_TYPE";
 
@@ -61,13 +62,21 @@ public class TicketAlarmProcessor extends IntentService {
      *
      * @see IntentService
      */
-    public static void startActionCheckTickets(Context context, int rideID, NotificationType type) {
+    public static void startActionSendRideNotification(Context context, String rideName,
+                                                       String ticketStartTime, int ticketId,
+                                                       NotificationType type) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         if(prefs.getBoolean(context.getString(R.string.pref_key_notifications_enable), true)) {
             Intent intent = new Intent(context, TicketAlarmProcessor.class);
-            intent.putExtra(NOTIFICATION_TICKET_ID, rideID);
-            intent.putExtra(NOTIFICATION_TYPE, type);
-            intent.setAction(ACTION_CHECK_TICKETS);
+
+            Bundle extras = new Bundle();
+            extras.putString(NOTIFICATION_RIDE_NAME, rideName);
+            extras.putString(NOTIFICATION_TICKET_START_TIME, ticketStartTime);
+            extras.putInt(NOTIFICATION_TICKET_ID, ticketId);
+            extras.putSerializable(NOTIFICATION_TYPE, type);
+
+            intent.putExtra(NOTIFICATION_BUNDLE, extras);
+            intent.setAction(ACTION_SEND_RIDE_NOTIFICATION);
             context.startService(intent);
         }
     }
@@ -76,12 +85,15 @@ public class TicketAlarmProcessor extends IntentService {
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
             final String action = intent.getAction();
-            if (ACTION_CHECK_TICKETS.equals(action)) {
+            if (ACTION_SEND_RIDE_NOTIFICATION.equals(action)) {
                 Bundle extras = intent.getExtras();
                 if(extras == null){
-                    handleActionCheckTickets(-1, NotificationType.CLOSE);
+                    handleActionSendRideNotification(null, null, 0, NotificationType.CLOSE);
                 }else{
-                    handleActionCheckTickets(extras.getInt(NOTIFICATION_TICKET_ID),
+                    handleActionSendRideNotification(
+                            extras.getString(NOTIFICATION_RIDE_NAME),
+                            extras.getString(NOTIFICATION_TICKET_START_TIME),
+                            extras.getInt(NOTIFICATION_TICKET_ID),
                             (NotificationType) extras.getSerializable(NOTIFICATION_TYPE));
                 }
             }
@@ -92,16 +104,9 @@ public class TicketAlarmProcessor extends IntentService {
      * Handle action Check Tickets in the provided background thread with the provided
      * parameters.
      */
-    private void handleActionCheckTickets(int rideID, NotificationType type) {
+    private void handleActionSendRideNotification(String rideName, String ticketStartTime,
+                                                  int ticketId, NotificationType type) {
         //if shared preferences notification toggle is off, don't send notification
-        Guest guest = GuestHolder.getInstance(this).getGuestObject();
-        Ticket ticket = null;
-        if(rideID > 0){
-            for(Ticket t : guest.getTickets()){
-                if(t.getRide().getId() == rideID)
-                    ticket = t;
-            }
-        }
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         long vibratePattern[];
@@ -146,7 +151,7 @@ public class TicketAlarmProcessor extends IntentService {
 
         // Create an Intent for the activity you want to start
         //Intent resultIntent = new Intent(this, MapsFragment.class);
-        //resultIntent.putExtra(NOTIFICATION_TICKET_ID, rideID);
+        //resultIntent.putExtra(NOTIFICATION_RIDE_NAME, rideID);
         // Create the TaskStackBuilder and add the intent, which inflates the back stack
         //TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
         //stackBuilder.addNextIntentWithParentStack(resultIntent);
@@ -156,20 +161,25 @@ public class TicketAlarmProcessor extends IntentService {
 
         String notificationTitle = getString(R.string.notification_title, "Test");
         String notificationText = getString(R.string.notification_generic);
-        if(ticket != null){
-            notificationTitle = getString(R.string.notification_title, ticket.getRide().getName());
+        NotificationType nextType = null;
+        if(rideName != null){
+            notificationTitle = getString(R.string.notification_title, rideName);
             switch(type){
                 case PRE_OPEN:
                     notificationText = getResources().getQuantityString(R.plurals.pre_window_open, timeToAlert/60, timeToAlert/60);
+                    nextType = NotificationType.OPEN;
                     break;
                 case OPEN:
                     notificationText = getString(R.string.window_open);
+                    nextType = NotificationType.PRE_CLOSE;
                     break;
                 case PRE_CLOSE:
                     notificationText = getResources().getQuantityString(R.plurals.pre_window_close, timeToAlert/60, timeToAlert/60);
+                    nextType = NotificationType.CLOSE;
                     break;
                 case CLOSE:
                     notificationText = getString(R.string.window_close);
+                    nextType = null;
                     break;
                 default:
                     break;
@@ -192,69 +202,62 @@ public class TicketAlarmProcessor extends IntentService {
         // notificationId is a unique int for each notification that you must define
         int notificationId =  (int)System.currentTimeMillis();
         notificationManager.notify("com.nolines.nolines", notificationId, mBuilder.build());
-    }
 
-    private static void setTicketNotificationsForGuest(Context context){
-        GuestHolder guest = GuestHolder.getInstance(context);
-        Intent ticketProcessorReceiver = new Intent(context, AlarmReceiver.class);
-        for(Ticket ticket : guest.getGuestObject().getTickets()){
-            setNotificationsForTicket(ticket, ticketProcessorReceiver, context);
+        if(nextType != null){
+            setTicketNotification(rideName, ticketStartTime, ticketId, this, nextType);
         }
     }
 
-    /**
-     * Sets an alarmmanager for ticket to send notifications when the ticket's ride window
-     * opens and closes and a period before each as well.
-     **/
-    public static void setNotificationsForTicket(Ticket ticket, Context context) {
-        setNotificationsForTicket(ticket, null, context);
-    }
+    public static void setTicketNotification(String rideName, String ticketStartTime,
+                                             int ticketId, Context context, NotificationType type){
+        Intent ticketProcessorReceiver = new Intent(context.getApplicationContext(), AlarmReceiver.class);
 
-    private static void setNotificationsForTicket(Ticket ticket, Intent intent, Context context){
-        Intent ticketProcessorReceiver = intent;
-        if(ticketProcessorReceiver == null)
-            ticketProcessorReceiver = new Intent(context.getApplicationContext(), AlarmReceiver.class);
-        ticketProcessorReceiver.putExtra(NOTIFICATION_TICKET_ID, ticket.getRide().getId());
+        Bundle extras = new Bundle();
+        extras.putString(NOTIFICATION_RIDE_NAME, rideName);
+        extras.putString(NOTIFICATION_TICKET_START_TIME, ticketStartTime);
+        extras.putInt(NOTIFICATION_TICKET_ID, ticketId);
+        extras.putSerializable(NOTIFICATION_TYPE, type);
+        ticketProcessorReceiver.putExtra(NOTIFICATION_BUNDLE, extras);
 
         AlarmManager alarmManager = (AlarmManager)context.getSystemService(context.ALARM_SERVICE);
 
-        //Get the start and end times of the ticket in seconds
-        long startTime = ticket.getLocalDatetimeFromTime().getTimeInMillis()/1000;
-        long endTime = startTime + 360; //Ride windows are 1 hour
+        DateFormat df = new SimpleDateFormat(Ticket.dateFormat);
+        df.setTimeZone(TimeZone.getTimeZone("UTC"));
 
-        int timeUntilStart = (int)(startTime - new Date().getTime()/1000);
-        //if there are more than timeToAlert seconds until the ride window opens then add
-        //an alert for it at timeToAlert seconds before the window opens and when the window opens
-        if(timeUntilStart > 60){
-            ticketProcessorReceiver.putExtra(NOTIFICATION_TYPE, NotificationType.OPEN);
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(context.getApplicationContext(),
-                    getUniqueID(ticket.getId(), 0), ticketProcessorReceiver, 0);
-            alarmManager.set(AlarmManager.RTC_WAKEUP, startTime * 1000, pendingIntent);
-
-            if(timeUntilStart > TicketAlarmProcessor.timeToAlert) {
-                ticketProcessorReceiver.putExtra(NOTIFICATION_TYPE, NotificationType.PRE_OPEN);
-                pendingIntent = PendingIntent.getBroadcast(context.getApplicationContext(),
-                        getUniqueID(ticket.getId(), 1), ticketProcessorReceiver, 0);
-                alarmManager.set(AlarmManager.RTC_WAKEUP, (startTime - TicketAlarmProcessor.timeToAlert) * 1000, pendingIntent);
-            }
+        Calendar cal = Calendar.getInstance();
+        try{
+            Date date = df.parse(ticketStartTime);
+            df.setTimeZone(TimeZone.getDefault());
+            cal.setTime(df.parse(df.format(date)));
+        } catch (ParseException e) {
         }
 
-        int timeUntilEnd = (int)(endTime - new Date().getTime()/1000);
-        //if there are more than timeToAlert seconds until the ride window closes then add
-        //an alert for it at timeToAlert seconds before the window closes and when the window closes
-        if(timeUntilEnd > 60) {
-            ticketProcessorReceiver.putExtra(NOTIFICATION_TYPE, NotificationType.CLOSE);
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(context.getApplicationContext(),
-                    getUniqueID(ticket.getId(), 2), ticketProcessorReceiver, 0);
-            alarmManager.set(AlarmManager.RTC_WAKEUP, endTime * 1000, pendingIntent);
-
-            if (timeUntilEnd > TicketAlarmProcessor.timeToAlert) {
-                ticketProcessorReceiver.putExtra(NOTIFICATION_TYPE, NotificationType.PRE_CLOSE);
-                pendingIntent = PendingIntent.getBroadcast(context.getApplicationContext(),
-                        getUniqueID(ticket.getId(), 3), ticketProcessorReceiver, 0);
-                alarmManager.set(AlarmManager.RTC_WAKEUP, (endTime - TicketAlarmProcessor.timeToAlert) * 1000, pendingIntent);
-            }
+        long startTimeMillis = cal.getTimeInMillis();
+        long triggerInSec = 0;
+        int idOffset = 0;
+        switch(type){
+            case PRE_OPEN:
+                idOffset = 0;
+                triggerInSec = startTimeMillis - TicketAlarmProcessor.timeToAlert*1000;
+                break;
+            case OPEN:
+                idOffset = 1;
+                triggerInSec = startTimeMillis;
+                break;
+            case PRE_CLOSE:
+                idOffset = 2;
+                triggerInSec = startTimeMillis + RideWindow.windowLength*1000 - TicketAlarmProcessor.timeToAlert*1000;
+                break;
+            case CLOSE:
+                idOffset = 3;
+                triggerInSec = startTimeMillis + RideWindow.windowLength*1000;
+                break;
+            default:
+                break;
         }
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context.getApplicationContext(),
+                getUniqueID(ticketId, idOffset), ticketProcessorReceiver, 0);
+        alarmManager.set(AlarmManager.RTC_WAKEUP, triggerInSec, pendingIntent);
     }
 
     /**
