@@ -266,8 +266,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
 
     @Override
     public void onMapClick(LatLng point){
+        currentDirections.remove();
         if (mLastLocationMarker != null) {
-            currentDirections.remove();
             mLastLocationMarker.remove();
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude()), 14));
             findDirectionsBtn.hide();
@@ -421,6 +421,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback,
     }
 
     private void displayRouteFromCurrentLocation(LatLng end){
+        if(currentDirections != null)
+            currentDirections.remove();
         if(mLastLocationMarker != null)
             mLastLocationMarker.remove();
         LatLng latLng = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());

@@ -116,13 +116,9 @@ public class GuestHolder {
                         .getSystemService(Context.ALARM_SERVICE);
                 Intent intent = new Intent(mContext.get().getApplicationContext(),
                         AlarmReceiver.class);
-                for(int i = 0; i < 4; i++){
-                    PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                            mContext.get().getApplicationContext(),
-                            TicketAlarmProcessor.getUniqueID(ticket_id, i),
-                            intent, 0);
-                    alarmManager.cancel(pendingIntent);
-                }
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                        mContext.get().getApplicationContext(), ticket_id, intent, 0);
+                alarmManager.cancel(pendingIntent);
             }
 
             @Override

@@ -4,6 +4,7 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -29,8 +30,11 @@ import com.nolines.nolines.viewmodels.ServiceTestCard;
 import com.nolines.nolines.viewmodels.ShopCard;
 import com.nolines.nolines.viewmodels.WelcomeCard;
 
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -152,32 +156,31 @@ public class HomeCardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 vh3.button.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        Toast.makeText(v.getContext(), "Notification sent!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(v.getContext(), "Notifications set!", Toast.LENGTH_SHORT).show();
 
-                        int ticket_id = 1111;
-                        AlarmManager alarmManager = (AlarmManager) v.getContext()
-                                .getSystemService(Context.ALARM_SERVICE);
-                        Intent intent = new Intent(v.getContext().getApplicationContext(),
-                                AlarmReceiver.class);
-                        for(int i = 0; i < 4; i++){
-                            PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                                    v.getContext().getApplicationContext(),
-                                    TicketAlarmProcessor.getUniqueID(ticket_id, i),
-                                    intent, 0);
-                            alarmManager.cancel(pendingIntent);
-                        }
+//                        SimpleDateFormat df = new SimpleDateFormat(Ticket.dateFormat);
+//                        df.setTimeZone(TimeZone.getTimeZone("UTC"));
+//                        Calendar cal = Calendar.getInstance();
+//                        cal.add(Calendar.SECOND, TicketAlarmProcessor.timeToAlert + 10);
+//                        String date = df.format(Calendar.getInstance().getTime());
+//                        TicketAlarmProcessor.setTicketNotification( "Rollercoaster", date, 1234,
+//                                v.getContext(), TicketAlarmProcessor.NotificationType.PRE_OPEN);
 
-                        SimpleDateFormat df = new SimpleDateFormat(Ticket.dateFormat);
-                        df.setTimeZone(TimeZone.getTimeZone("UTC"));
+                        Intent ticketProcessorReceiver = new Intent(v.getContext().getApplicationContext(), AlarmReceiver.class);
+
+                        Bundle extras = new Bundle();
+                        extras.putString(TicketAlarmProcessor.NOTIFICATION_RIDE_NAME, "");
+                        extras.putString(TicketAlarmProcessor.NOTIFICATION_TICKET_START_TIME, "");
+                        extras.putInt(TicketAlarmProcessor.NOTIFICATION_TICKET_ID, 0);
+                        extras.putSerializable(TicketAlarmProcessor.NOTIFICATION_TYPE, null);
+                        ticketProcessorReceiver.putExtra(TicketAlarmProcessor.NOTIFICATION_BUNDLE, extras);
+
+                        AlarmManager alarmManager = (AlarmManager)v.getContext().getSystemService(v.getContext().ALARM_SERVICE);
                         Calendar cal = Calendar.getInstance();
-                        cal.add(Calendar.SECOND, TicketAlarmProcessor.timeToAlert + 10);
-                        String date = df.format(Calendar.getInstance().getTime());
-                        TicketAlarmProcessor.setTicketNotification( "Rollercoaster", date, 1234,
-                                v.getContext(),
-                                TicketAlarmProcessor.NotificationType.PRE_OPEN);
 
-                        //TicketAlarmProcessor.startActionSendRideNotification(v.getContext(), -1,
-                                //TicketAlarmProcessor.NotificationType.CLOSE);
+                        PendingIntent pendingIntent = PendingIntent.getBroadcast(v.getContext().getApplicationContext(),
+                                0, ticketProcessorReceiver, PendingIntent.FLAG_UPDATE_CURRENT);
+                        alarmManager.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), pendingIntent);
                     }
                 });
                 break;

@@ -10,7 +10,8 @@ import com.nolines.nolines.api.models.Ticket;
 public class AlarmReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent){
-        Bundle extras = intent.getExtras();
+        Bundle extras = intent.getBundleExtra(TicketAlarmProcessor.NOTIFICATION_BUNDLE);
+
         if(extras == null){
             TicketAlarmProcessor.startActionSendRideNotification(context,
                     null, null, 0, TicketAlarmProcessor.NotificationType.CLOSE);

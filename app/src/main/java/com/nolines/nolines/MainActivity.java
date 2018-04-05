@@ -182,7 +182,7 @@ public class MainActivity extends AppCompatActivity
         }
         if(fragment != null){
             Bundle args = new Bundle();
-            args.putInt(RIDE_ID_ARGUMENT, ticket.getId());
+            args.putInt(RIDE_ID_ARGUMENT, ticket.getRide().getId());
             fragment.setArguments(args);
             getSupportFragmentManager().beginTransaction().
                     replace(R.id.fragment_container, fragment).

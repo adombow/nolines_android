@@ -36,7 +36,7 @@ import java.util.TimeZone;
  */
 public class TicketAlarmProcessor extends IntentService{
 
-    public static final int timeToAlert = 90; //Time before the event to send an alert for (in seconds)
+    public static final int timeToAlert = 120;//300; //Time before the event to send an alert for (in seconds)
 
     private static final String RIDE_NOTIFICATION_CHANNEL_ID = "com.nolines.nolines.RIDE_NOTIFICATIONS";
 
@@ -86,7 +86,7 @@ public class TicketAlarmProcessor extends IntentService{
         if (intent != null) {
             final String action = intent.getAction();
             if (ACTION_SEND_RIDE_NOTIFICATION.equals(action)) {
-                Bundle extras = intent.getExtras();
+                Bundle extras = intent.getBundleExtra(NOTIFICATION_BUNDLE);
                 if(extras == null){
                     handleActionSendRideNotification(null, null, 0, NotificationType.CLOSE);
                 }else{
@@ -162,11 +162,12 @@ public class TicketAlarmProcessor extends IntentService{
         String notificationTitle = getString(R.string.notification_title, "Test");
         String notificationText = getString(R.string.notification_generic);
         NotificationType nextType = null;
-        if(rideName != null){
+        if(rideName != null && type != null){
             notificationTitle = getString(R.string.notification_title, rideName);
             switch(type){
                 case PRE_OPEN:
-                    notificationText = getResources().getQuantityString(R.plurals.pre_window_open, timeToAlert/60, timeToAlert/60);
+                    //notificationText = getResources().getQuantityString(R.plurals.pre_window_open, timeToAlert/60, timeToAlert/60);
+                    notificationText = "Your ride window opens in " + timeToAlert/60 + "minutes";
                     nextType = NotificationType.OPEN;
                     break;
                 case OPEN:
@@ -174,7 +175,8 @@ public class TicketAlarmProcessor extends IntentService{
                     nextType = NotificationType.PRE_CLOSE;
                     break;
                 case PRE_CLOSE:
-                    notificationText = getResources().getQuantityString(R.plurals.pre_window_close, timeToAlert/60, timeToAlert/60);
+                    //notificationText = getResources().getQuantityString(R.plurals.pre_window_close, timeToAlert/60, timeToAlert/60);
+                    notificationText = "Your ride window closes in " + timeToAlert/60 + "minutes";
                     nextType = NotificationType.CLOSE;
                     break;
                 case CLOSE:
@@ -238,7 +240,7 @@ public class TicketAlarmProcessor extends IntentService{
         switch(type){
             case PRE_OPEN:
                 idOffset = 0;
-                triggerInSec = startTimeMillis - TicketAlarmProcessor.timeToAlert*1000;
+                triggerInSec = startTimeMillis - (long) (TicketAlarmProcessor.timeToAlert*1000);
                 break;
             case OPEN:
                 idOffset = 1;
@@ -246,17 +248,17 @@ public class TicketAlarmProcessor extends IntentService{
                 break;
             case PRE_CLOSE:
                 idOffset = 2;
-                triggerInSec = startTimeMillis + RideWindow.windowLength*1000 - TicketAlarmProcessor.timeToAlert*1000;
+                triggerInSec = startTimeMillis + (long) ((RideWindow.windowLength - TicketAlarmProcessor.timeToAlert)*1000);
                 break;
             case CLOSE:
                 idOffset = 3;
-                triggerInSec = startTimeMillis + RideWindow.windowLength*1000;
+                triggerInSec = startTimeMillis + (long) (RideWindow.windowLength*1000);
                 break;
             default:
                 break;
         }
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context.getApplicationContext(),
-                getUniqueID(ticketId, idOffset), ticketProcessorReceiver, 0);
+                getUniqueID(ticketId, idOffset), ticketProcessorReceiver, PendingIntent.FLAG_UPDATE_CURRENT);
         alarmManager.set(AlarmManager.RTC_WAKEUP, triggerInSec, pendingIntent);
     }
 
