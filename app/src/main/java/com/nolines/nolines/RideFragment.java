@@ -23,6 +23,7 @@ import android.widget.DatePicker;
 
 import com.nolines.nolines.adapters.RideAdapter;
 import com.nolines.nolines.api.models.Guest;
+import com.nolines.nolines.api.models.GuestHolder;
 import com.nolines.nolines.api.models.Ride;
 import com.nolines.nolines.api.models.RidesHolder;
 import com.nolines.nolines.api.models.Ticket;
@@ -78,7 +79,7 @@ public class RideFragment extends Fragment implements Updateable, RideWindowDial
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getRides();
+
     }
 
     @Override
@@ -87,6 +88,8 @@ public class RideFragment extends Fragment implements Updateable, RideWindowDial
         View view = inflater.inflate(R.layout.fragment_ride_list, container, false);
 
         ButterKnife.bind(this, view);
+
+        getRides();
 
         setupRefreshLayout();
         setupToolbar();
@@ -139,6 +142,7 @@ public class RideFragment extends Fragment implements Updateable, RideWindowDial
     @Override
     public void onPause(){
         super.onPause();
+        mAdapter = null;
         rides.unregisterListener(this);
     }
 
@@ -146,6 +150,7 @@ public class RideFragment extends Fragment implements Updateable, RideWindowDial
     public void onDetach() {
         super.onDetach();
         mListener = null;
+        mAdapter = null;
         rides.unregisterListener(this);
     }
 
@@ -173,7 +178,12 @@ public class RideFragment extends Fragment implements Updateable, RideWindowDial
     private void getRides() {
         rides = RidesHolder.getInstance(this.getActivity());
         rides.registerListener(this);
-        rides.refreshRides();
+
+        if(!rides.isEmpty()) {
+            onRidesUpdate();
+        }else{
+            swipeRefreshLayout.setRefreshing(true);
+        }
     }
 
 
@@ -236,7 +246,7 @@ public class RideFragment extends Fragment implements Updateable, RideWindowDial
     }
 
     private void setupRefreshLayout() {
-        swipeRefreshLayout.setRefreshing(true);
+
 
         swipeRefreshLayout.setOnRefreshListener(
                 new SwipeRefreshLayout.OnRefreshListener() {
@@ -259,6 +269,7 @@ public class RideFragment extends Fragment implements Updateable, RideWindowDial
         if(status_code == 200){
             TicketCreatedDialog dialog = TicketCreatedDialog.newInstance(this, ticket, getString(R.string.header_reservation_made));
             dialog.show(((Activity) this.getContext()).getFragmentManager(), "TicketCreated");
+            GuestHolder.getInstance(this.getActivity()).refreshGuest();
         }
         else {
             TicketErrorDialog dialog = new TicketErrorDialog();

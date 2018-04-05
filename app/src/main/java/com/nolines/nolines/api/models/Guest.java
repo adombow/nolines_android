@@ -30,7 +30,6 @@ public class Guest {
     }
 
     public String getName(){ return this.name; }
-    public List<Ticket> getTickets(){ return this.tickets; }
 
     /**
      * Gets a list of all of this guest's tickets that are available for the date represented by testDate

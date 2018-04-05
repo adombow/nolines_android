@@ -4,8 +4,11 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
+import android.icu.text.DateFormat;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -16,8 +19,10 @@ import com.nolines.nolines.api.models.Ride;
 import com.nolines.nolines.api.models.RideWindow;
 import com.squareup.picasso.Picasso;
 
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -55,16 +60,14 @@ public class RideWindowDialog extends DialogFragment {
         Bundle args = new Bundle();
         args.putString("ride_name",ride.getName());
 
-        DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        df1.setTimeZone(TimeZone.getTimeZone("UTC"));
-        Date date;
-        try {
-            date = df1.parse(ride.getWindowDate());
-            args.putString("window_time",DateFormat.getTimeInstance(DateFormat.SHORT).format(date.getTime()));
+        Calendar cal = rideWindow.getLocalDatetimeFromTime();
+        cal.add(Calendar.HOUR, 1);
+        SimpleDateFormat formatter = new SimpleDateFormat("h:mm a");
+        formatter.setTimeZone(TimeZone.getDefault());
 
-        }
-        catch(Exception e){}
+        String startTime = formatter.format(cal.getTime());
 
+        args.putString("window_time", startTime);
         args.putString("date",mDate);
         args.putString("window_id",rideWindow.getIdString());
         args.putString("image_url",ride.getPhotoURL());

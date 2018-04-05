@@ -81,7 +81,7 @@ public class TicketFragment extends Fragment implements Updateable, RecyclerItem
 
         calendar = Calendar.getInstance();
 
-        getGuest();
+
     }
 
     @Override
@@ -90,6 +90,8 @@ public class TicketFragment extends Fragment implements Updateable, RecyclerItem
         View view = inflater.inflate(R.layout.fragment_ticket_list, container, false);
 
         ButterKnife.bind(this, view);
+
+        getGuest();
 
         setupRefreshLayout();
         setupToolbar();
@@ -152,11 +154,13 @@ public class TicketFragment extends Fragment implements Updateable, RecyclerItem
     public void onDetach() {
         super.onDetach();
         mListener = null;
+        mAdapter = null;
     }
 
     @Override
     public void onPause(){
         super.onPause();
+        mAdapter = null;
         mGuest.unregisterListener(this);
     }
 

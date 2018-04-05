@@ -60,8 +60,9 @@ public class RideAdapter extends RecyclerView.Adapter<RideAdapter.RideViewHolder
     }
 
     public void updateRideList(List<Ride> rides){
-        mRides = rides;
-        notifyDataSetChanged();
+        mRides.clear();
+        mRides.addAll(rides);
+        this.notifyDataSetChanged();
     }
 
     public void setTimeFrame(@Ride.TimeFrame int timeFrame){

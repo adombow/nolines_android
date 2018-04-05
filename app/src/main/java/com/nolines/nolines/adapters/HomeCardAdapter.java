@@ -18,6 +18,7 @@ import com.nolines.nolines.dummy.DummyContent.DummyItem;
 import com.nolines.nolines.viewmodels.MapCard;
 import com.nolines.nolines.viewmodels.ReservationCard;
 import com.nolines.nolines.viewmodels.ServiceTestCard;
+import com.nolines.nolines.viewmodels.ShopCard;
 import com.nolines.nolines.viewmodels.WelcomeCard;
 
 import java.util.List;
@@ -35,10 +36,11 @@ public class HomeCardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private List<Object> mCards;
     private final OnListFragmentInteractionListener mListener;
 
-    private final int WELCOME_CARD = 0;
-    private final int MAP_CARD = 1;
-    private final int RESERVATION_CARD = 2;
-    private final int SERVICE_TEST_CARD = 3;
+    public final int WELCOME_CARD = 0;
+    public final int MAP_CARD = 1;
+    public final int RESERVATION_CARD = 2;
+    public final int SERVICE_TEST_CARD = 3;
+    public final int SHOP_CARD = 4;
 
     public HomeCardAdapter(List<Object> cards, OnListFragmentInteractionListener listener) {
         mCards = cards;
@@ -55,17 +57,6 @@ public class HomeCardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         switch (viewType) {
             case WELCOME_CARD:
                 view = inflater.inflate(R.layout.card_welcome, parent, false);
-                view.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        if (null != mListener) {
-                            // Notify the active callbacks interface (the activity, if the
-                            // fragment is attached to one) that an item has been selected.
-                            mListener.onReservationHeaderClicked();
-                        }
-                    }
-                });
-
                 viewHolder = new WelcomeCardViewHolder(view);
                 break;
             case SERVICE_TEST_CARD:
@@ -77,15 +68,32 @@ public class HomeCardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 viewHolder = new MapCardViewHolder(view);
                 break;
             case RESERVATION_CARD:
-                view = inflater.inflate(R.layout.card_default, parent, false);
+                view = inflater.inflate(R.layout.card_reservations, parent, false);
                 viewHolder = new ReservationCardViewHolder(view);
                 break;
-
+            case SHOP_CARD:
+                view = inflater.inflate(R.layout.card_shop, parent, false);
+                viewHolder = new ShopCardViewHolder(view);
+                break;
             default:
                 view = inflater.inflate(R.layout.card_default, parent, false);
                 viewHolder = new WelcomeCardViewHolder(view);
                 break;
         }
+
+        final int fViewType = viewType;
+
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (null != mListener) {
+                    // Notify the active callbacks interface (the activity, if the
+                    // fragment is attached to one) that an item has been selected.
+                    mListener.onHomeCardClicked(fViewType);
+                }
+            }
+        });
+
         return viewHolder;
     }
 
@@ -109,7 +117,20 @@ public class HomeCardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             case WELCOME_CARD:
                 WelcomeCardViewHolder vh1 = (WelcomeCardViewHolder) viewHolder;
                 WelcomeCard card = (WelcomeCard) mCards.get(position);
-                ((WelcomeCardViewHolder) viewHolder).textView.setText("Welcome " + card.getName()+"!");
+                vh1.title.setText("Welcome " + card.getName()+"!");
+
+                int ticketCount = card.getTicketCount();
+
+                if(ticketCount == 1){
+                    vh1.subtitle.setText("You have one reservation today.");
+                }
+                else if (ticketCount > 1){
+                    vh1.subtitle.setText("You have " +ticketCount + " reservations today.");
+                }
+                else{
+                    vh1.subtitle.setText("You have no reservations for today.");
+                }
+
                 break;
             case SERVICE_TEST_CARD:
                 ServiceTestCardViewHolder vh3 = (ServiceTestCardViewHolder) viewHolder;
@@ -133,6 +154,17 @@ public class HomeCardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 MapCardViewHolder vh = (MapCardViewHolder) viewHolder;
                 vh.title.setText("Lost?");
                 vh.subtitle.setText("We can provide you with directions to your next attraction!");
+
+                vh.button.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if (null != mListener) {
+                            // Notify the active callbacks interface (the activity, if the
+                            // fragment is attached to one) that an item has been selected.
+                            mListener.onHomeCardClicked(MAP_CARD);
+                        }
+                    }
+                });
                 break;
             case RESERVATION_CARD:
                 ReservationCardViewHolder vh4 = (ReservationCardViewHolder) viewHolder;
@@ -140,6 +172,18 @@ public class HomeCardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
                 vh4.title.setText("Tired of waiting in line?");
                 vh4.subtitle.setText("Make a NoLines reservation to reserve your spot in line.");
                 vh4.imageView.setImageResource(R.drawable.header_lines);
+
+
+                vh4.button.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if (null != mListener) {
+                            // Notify the active callbacks interface (the activity, if the
+                            // fragment is attached to one) that an item has been selected.
+                            mListener.onHomeCardClicked(RESERVATION_CARD);
+                        }
+                    }
+                });
                 break;
             default:
                 break;
@@ -157,6 +201,8 @@ public class HomeCardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             return RESERVATION_CARD;
         } else if(card instanceof MapCard){
             return MAP_CARD;
+        } else if(card instanceof ShopCard){
+            return SHOP_CARD;
         }
 
         return -1;
@@ -173,7 +219,8 @@ public class HomeCardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     public class WelcomeCardViewHolder extends RecyclerView.ViewHolder {
-        @BindView(R.id.title) TextView textView;
+        @BindView(R.id.title) TextView title;
+        @BindView(R.id.subtitle) TextView subtitle;
 
         public WelcomeCardViewHolder(View view) {
             super(view);
@@ -213,6 +260,14 @@ public class HomeCardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         @BindView(R.id.welcome_card_button) Button button;
 
         public MapCardViewHolder(View view) {
+            super(view);
+            ButterKnife.bind(this,view);
+        }
+    }
+
+
+    public class ShopCardViewHolder extends RecyclerView.ViewHolder {
+        public ShopCardViewHolder(View view) {
             super(view);
             ButterKnife.bind(this,view);
         }
