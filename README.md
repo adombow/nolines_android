@@ -70,7 +70,7 @@ One of the biggest complaints that many people have about going to theme parks i
 
 ## Contributions
 
-#### Timothy Leung:
+#### [Timothy Leung](https://github.com/leungtimothy "Tim's Github Page"):
 
 * Server and Datbase
 * UI design
